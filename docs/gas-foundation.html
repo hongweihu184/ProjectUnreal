@@ -210,6 +210,7 @@ public:
 
   <h3>MyAttributeSet.cpp(完整代码)</h3>
 <pre><code>#include "MyAttributeSet.h"
+#include "GameplayEffectExtension.h"   // FGameplayEffectModCallbackData 的完整定义,漏了会报 C2027
 
 UMyAttributeSet::UMyAttributeSet()
 {
@@ -433,6 +434,7 @@ void ABaseCharacter::BeginPlay()
   <table>
     <tr><th style="width:280px">报错(关键词)</th><th>原因与解法</th></tr>
     <tr><td><code>generated.h file should be included last</code></td><td>include 顺序:generated.h 必须是最后一个。</td></tr>
+    <tr><td><code>error C2027: 使用了未定义类型 "FGameplayEffectModCallbackData"</code></td><td>它的完整定义在 <code>GameplayEffectExtension.h</code>(AttributeSet.h 里只有前向声明)。在 .cpp 里补 <code>#include "GameplayEffectExtension.h"</code>。</td></tr>
     <tr><td><code>unresolved external symbol</code> + GAS 相关符号 / LNK2019</td><td>模块没依赖 GAS。检查 <code>ProjectUnreal.Build.cs</code> 里有 <code>GameplayAbilities, GameplayTags, GameplayTasks</code>。改 Build.cs 后需重新生成工程文件再编译。</td></tr>
     <tr><td><code>'UAttributeSet': base class undefined</code> / 找不到 AttributeSet.h</td><td>头文件没引对:<code>#include "AttributeSet.h"</code>,且 .h 里要 <code>#include "AbilitySystemComponent.h"</code>(宏需要)。</td></tr>
     <tr><td><code>GetHealthAttribute is not a member</code></td><td><code>ATTRIBUTE_ACCESSORS</code> 宏漏写或类名/属性名与 UPROPERTY 不一致(大小写敏感)。</td></tr>
