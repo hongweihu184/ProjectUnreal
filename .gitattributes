@@ -1,0 +1,23 @@
+# Unreal 二进制资产：禁止换行符转换、禁止文本 diff
+*.uasset binary
+*.umap binary
+*.uexp binary
+*.ubulk binary
+*.ufont binary
+*.bin binary
+*.dll binary
+*.exe binary
+*.png binary
+*.jpg binary
+*.wav binary
+*.ogg binary
+
+# 文本资产统一 LF
+*.ini text eol=lf
+*.cs text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.uproject text eol=lf
+*.uplugin text eol=lf
