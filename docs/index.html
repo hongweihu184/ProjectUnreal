@@ -239,7 +239,7 @@
     <h4>验收</h4>
     <p>编辑器正常打开，Content 资产完整，PIE 可运行。</p>
     <h4>实际执行记录</h4>
-    <p>2026-10-05 完成（由 AI 直接手写 Source 骨架，未走 New C++ Class 向导）。产出：<code>Source/ProjectUnreal.Target.cs</code>、<code>ProjectUnrealEditor.Target.cs</code>、<code>ProjectUnreal/{ProjectUnreal.Build.cs,.h,.cpp}</code>；Build.cs 依赖 Core/CoreUObject/Engine/InputCore/EnhancedInput + GAS 三件套；.uproject 启用 GameplayAbilities 与 GameplayStateTree 插件。UE5.8 的 UBT 需 .NET 10，须用引擎自带 <code>Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe</code> 调 UBT。编译 89s 通过，编辑器正常打开（首次着色器编译较慢）。两个坑见附录 C-1、C-2。</p>
+    <p>2026-10-05 完成（由 AI 直接手写 Source 骨架，未走 New C++ Class 向导）。产出：<code>Source/ProjectUnreal.Target.cs</code>、<code>ProjectUnrealEditor.Target.cs</code>、<code>ProjectUnreal/{ProjectUnreal.Build.cs,.h,.cpp}</code>；Build.cs 依赖 Core/CoreUObject/Engine/InputCore/EnhancedInput + GAS 三件套；.uproject 启用 GameplayAbilities 与 GameplayStateTree 插件。UE5.8 的 UBT 需 .NET 10，须用引擎自带 <code>Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe</code> 调 UBT。编译 89s 通过，编辑器正常打开（首次着色器编译较慢），同日人工确认编辑器启动无异常。两个坑见附录 C-1、C-2。</p>
   </div>
 </section>
 
