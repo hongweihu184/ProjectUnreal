@@ -139,8 +139,8 @@
   <p class="meta">以「次」为单位（一次 ≈ 2–3 小时专注工作）。状态标签：<span class="tag t-todo">待做</span><span class="tag t-doing">进行中</span><span class="tag t-done">完成</span>｜类型：<span class="tag t-cpp">C++</span><span class="tag t-bp">蓝图</span><span class="tag t-design">策划/编辑器</span></p>
   <table id="plantable">
     <tr><th style="width:44px">#</th><th>阶段</th><th>产出（验收标准）</th><th style="width:130px">主要知识点</th><th style="width:70px">预计</th><th style="width:70px">状态</th></tr>
-    <tr><td>0</td><td>git init + 基线提交</td><td>工程纳入版本管理，可随时回滚</td><td>git / .gitignore</td><td>0.5 次</td><td><span class="tag t-todo">待做</span></td></tr>
-    <tr><td>1</td><td>工程 C++ 化</td><td>生成 Source 与空模块，编译通过，编辑器正常打开</td><td>模块 / Build.cs / UBT</td><td>1 次</td><td><span class="tag t-todo">待做</span></td></tr>
+    <tr><td>0</td><td>git init + 基线提交</td><td>工程纳入版本管理，可随时回滚</td><td>git / .gitignore</td><td>0.5 次</td><td><span class="tag t-done">完成</span></td></tr>
+    <tr><td>1</td><td>工程 C++ 化</td><td>生成 Source 与空模块，编译通过，编辑器正常打开</td><td>模块 / Build.cs / UBT</td><td>1 次</td><td><span class="tag t-done">完成</span></td></tr>
     <tr><td>2</td><td>GAS 地基</td><td>ASC + AttributeSet(HP/体力) + 初始化 GE，属性面板可见数值</td><td>ASC / AttributeSet / GE / GameplayTag</td><td>2 次</td><td><span class="tag t-todo">待做</span></td></tr>
     <tr><td>3</td><td>主角接入</td><td>Greystone 可跑跳、相机/输入完整，替代默认角色</td><td>Enhanced Input / AnimBP / CharacterMovement</td><td>1–2 次</td><td><span class="tag t-todo">待做</span></td></tr>
     <tr><td>4</td><td>三连击 + 伤害</td><td>鼠标连点出三段连击；命中木桩扣血；体力消耗</td><td>GA / AbilityTask / GameplayEvent / 伤害 GE</td><td>2–3 次</td><td><span class="tag t-todo">待做</span></td></tr>
@@ -187,7 +187,7 @@
 
 <!-- ============ 第 0 章 ============ -->
 <section id="ch0">
-  <h2>第 0 章 · 备份与版本管理 <span class="tag t-doing">进行中</span></h2>
+  <h2>第 0 章 · 备份与版本管理 <span class="tag t-done">完成</span></h2>
   <div class="card">
     <h4>目标</h4>
     <p>工程纳入 git，建立可回滚的基线；轻量部分（代码/文档/配置）推 GitHub 公开仓库，作为简历可附的代码链接。</p>
@@ -210,13 +210,13 @@
     <h4>验收</h4>
     <p>外层 <code>git status</code> 干净且不含 Content；内层提交完成；GitHub 仓库可访问、结构与本地一致。</p>
     <h4>实际执行记录</h4>
-    <p class="meta">（执行后补充：日期、问题、结果）</p>
+    <p>2026-10-05 完成。外层 3 笔提交（骨架基线 → 架构说明 → C++ 化），内层 Content 基线 1 笔（19GB 素材）。远端 <a href="https://github.com/hongweihu184/ProjectUnreal">github.com/hongweihu184/ProjectUnreal</a> 已推送 main。首次推送直连被重置，给 git 配本机代理（127.0.0.1:7897）后成功（见附录 C-3）。</p>
   </div>
 </section>
 
 <!-- ============ 第 1 章 ============ -->
 <section id="ch1">
-  <h2>第 1 章 · 工程 C++ 化 <span class="tag t-todo">待做</span></h2>
+  <h2>第 1 章 · 工程 C++ 化 <span class="tag t-done">完成</span></h2>
   <div class="card">
     <h4>目标</h4>
     <p>纯蓝图工程变为 C++ 工程：出现 <code>Source/</code> 目录，编译通过，编辑器照常打开，<strong>不动任何现有资产</strong>。</p>
@@ -239,7 +239,7 @@
     <h4>验收</h4>
     <p>编辑器正常打开，Content 资产完整，PIE 可运行。</p>
     <h4>实际执行记录</h4>
-    <p class="meta">（执行后填写）</p>
+    <p>2026-10-05 完成（由 AI 直接手写 Source 骨架，未走 New C++ Class 向导）。产出：<code>Source/ProjectUnreal.Target.cs</code>、<code>ProjectUnrealEditor.Target.cs</code>、<code>ProjectUnreal/{ProjectUnreal.Build.cs,.h,.cpp}</code>；Build.cs 依赖 Core/CoreUObject/Engine/InputCore/EnhancedInput + GAS 三件套；.uproject 启用 GameplayAbilities 与 GameplayStateTree 插件。UE5.8 的 UBT 需 .NET 10，须用引擎自带 <code>Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe</code> 调 UBT。编译 89s 通过，编辑器正常打开（首次着色器编译较慢）。两个坑见附录 C-1、C-2。</p>
   </div>
 </section>
 
@@ -508,7 +508,9 @@
   <p class="meta">每个坑按「现象 → 原因 → 解法 → 教训」记录。预期会有：编译错误、资产路径、动画通知不触发、GE 不生效、AI 不动、打包失败……</p>
   <table>
     <tr><th style="width:60px">编号</th><th>现象</th><th>原因</th><th>解法</th><th>教训</th></tr>
-    <tr><td colspan="5" class="meta">（制作过程中填写）</td></tr>
+    <tr><td>C-1</td><td>首次 UBT 编译直接失败：报 "modifies the values of properties ... not allowed, build products in common with UnrealEditor"</td><td>Target.cs 用了 <code>BuildSettingsVersion.V5</code>，与引擎共享构建环境冲突（UE5.8 默认已升级）</td><td>两个 Target.cs 改为 <code>DefaultBuildSettings = BuildSettingsVersion.V7;</code></td><td>新版本引擎建 C++ 工程，抄旧教程的 V5 会踩坑；报错信息本身给了答案，先读完报错再改</td></tr>
+    <tr><td>C-2</td><td>编译报 "Unable to find plugin 'GameplayStateTreeModule'"</td><td>插件名记错，UE5.8 里该插件叫 <code>GameplayStateTree</code>（位于 Engine/Plugins/Runtime/GameplayStateTree）</td><td>.uproject 改成正确名称；不确定时用 <code>find Engine/Plugins -name "*.uplugin"</code> 核对</td><td>插件名以引擎 Plugins 目录里的 .uplugin 文件名为准，别凭印象写</td></tr>
+    <tr><td>C-3</td><td><code>git push</code> 报 "Recv failure: Connection was reset"</td><td>本机代理（7897 端口）只对走系统代理的程序生效，git 默认直连被重置</td><td><code>git config --global http.proxy http://127.0.0.1:7897</code>（https 同理）后推送成功；代理关闭时需 unset</td><td>curl 能通不代表 git 能通；网络工具各走各的代理配置</td></tr>
   </table>
 </section>
 
