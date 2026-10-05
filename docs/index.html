@@ -141,7 +141,7 @@
     <tr><th style="width:44px">#</th><th>阶段</th><th>产出（验收标准）</th><th style="width:130px">主要知识点</th><th style="width:70px">预计</th><th style="width:70px">状态</th></tr>
     <tr><td>0</td><td>git init + 基线提交</td><td>工程纳入版本管理，可随时回滚</td><td>git / .gitignore</td><td>0.5 次</td><td><span class="tag t-done">完成</span></td></tr>
     <tr><td>1</td><td>工程 C++ 化</td><td>生成 Source 与空模块，编译通过，编辑器正常打开</td><td>模块 / Build.cs / UBT</td><td>1 次</td><td><span class="tag t-done">完成</span></td></tr>
-    <tr><td>2</td><td>GAS 地基</td><td>ASC + AttributeSet(HP/体力) + 初始化 GE，属性面板可见数值</td><td>ASC / AttributeSet / GE / GameplayTag</td><td>2 次</td><td><span class="tag t-todo">待做</span></td></tr>
+    <tr><td>2</td><td>GAS 地基</td><td>ASC + AttributeSet(HP/体力) + 初始化 GE，属性面板可见数值</td><td>ASC / AttributeSet / GE / GameplayTag</td><td>2 次</td><td><span class="tag t-doing">进行中</span></td></tr>
     <tr><td>3</td><td>主角接入</td><td>Greystone 可跑跳、相机/输入完整，替代默认角色</td><td>Enhanced Input / AnimBP / CharacterMovement</td><td>1–2 次</td><td><span class="tag t-todo">待做</span></td></tr>
     <tr><td>4</td><td>三连击 + 伤害</td><td>鼠标连点出三段连击；命中木桩扣血；体力消耗</td><td>GA / AbilityTask / GameplayEvent / 伤害 GE</td><td>2–3 次</td><td><span class="tag t-todo">待做</span></td></tr>
     <tr><td>5</td><td>翻滚 + 无敌帧 + 受击死亡</td><td>翻滚躲伤害；被打有硬直；血空播死亡</td><td>AnimNotifyState / GrantedTag / Immunity</td><td>2 次</td><td><span class="tag t-todo">待做</span></td></tr>
@@ -245,8 +245,9 @@
 
 <!-- ============ 第 2 章 ============ -->
 <section id="ch2">
-  <h2>第 2 章 · GAS 地基 <span class="tag t-todo">待做</span></h2>
+  <h2>第 2 章 · GAS 地基 <span class="tag t-doing">进行中</span></h2>
   <div class="card">
+    <div class="note ok"><strong>配套开发者笔记已就绪</strong>:<a href="gas-foundation.html">开发者笔记 01 · GAS 地基</a>——完整代码 + 逐段解释 + C# 类比 + 编辑器点击步骤,照做即可。tranek/Narxim 仅作深入参考。</div>
     <h4>目标</h4>
     <p>三个 C++ 类 + 一组配置，搭起 GAS 最小骨架；角色身上能看到 HP/体力数值。</p>
     <h4>产出物清单</h4>

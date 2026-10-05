@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开发者笔记 01 · GAS 地基 · 魂类 ARPG Demo</title>
+<style>
+  :root{
+    --bg:#14161a; --bg2:#1c1f26; --bg3:#242833; --fg:#d8dce4; --dim:#8a91a0;
+    --accent:#c8a15a; --accent2:#7aa2f7; --ok:#6fbf73; --warn:#e0a050; --bad:#e06060;
+    --border:#2e3340;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--fg); font:15px/1.75 "Microsoft YaHei","PingFang SC",sans-serif;
+       display:flex; min-height:100vh;}
+  nav{width:250px; flex:0 0 250px; background:var(--bg2); border-right:1px solid var(--border);
+      position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 14px;}
+  nav h1{font-size:16px; color:var(--accent); margin-bottom:4px;}
+  nav .sub{font-size:12px; color:var(--dim); margin-bottom:16px;}
+  nav a{display:block; color:var(--fg); text-decoration:none; font-size:13.5px;
+        padding:5px 10px; border-radius:6px; border-left:2px solid transparent;}
+  nav a:hover{background:var(--bg3);}
+  nav .grp{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin:14px 0 4px 10px;}
+  main{flex:1; max-width:920px; padding:40px 48px 120px;}
+  section{margin-bottom:56px;}
+  h2{font-size:24px; color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:16px;}
+  h3{font-size:18px; color:var(--accent2); margin:24px 0 10px;}
+  h4{font-size:15.5px; margin:18px 0 8px; color:var(--fg);}
+  p{margin:8px 0;}
+  ul,ol{margin:8px 0 8px 24px;}
+  li{margin:3px 0;}
+  code{background:var(--bg3); padding:1px 6px; border-radius:4px; font-family:Consolas,monospace; font-size:13px; color:#e8c07d;}
+  pre{background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:14px 16px;
+      overflow-x:auto; margin:10px 0; font-family:Consolas,monospace; font-size:13px; line-height:1.55;}
+  pre code{background:none; padding:0; color:var(--fg);}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13.5px;}
+  th{background:var(--bg3); color:var(--accent); text-align:left;}
+  th,td{border:1px solid var(--border); padding:7px 10px; vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .card{background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin:12px 0;}
+  .note{border-left:3px solid var(--accent2); background:var(--bg2); padding:10px 16px; margin:12px 0; border-radius:0 8px 8px 0;}
+  .warn{border-left:3px solid var(--warn);}
+  .bad{border-left:3px solid var(--bad);}
+  .ok{border-left:3px solid var(--ok);}
+  .tag{display:inline-block; font-size:11px; padding:1px 8px; border-radius:10px; margin-right:6px; vertical-align:middle;}
+  .t-todo{background:#3a3f4d; color:var(--dim);}
+  .t-doing{background:#4a4420; color:var(--warn);}
+  .t-done{background:#23402a; color:var(--ok);}
+  .t-cpp{background:#20344a; color:var(--accent2);}
+  .t-bp{background:#3a2340; color:#c58af0;}
+  .t-design{background:#403a20; color:var(--accent);}
+  a{color:var(--accent2);}
+  .meta{color:var(--dim); font-size:12.5px;}
+  .cs{color:#6fbf73;}
+  @media (max-width:900px){ nav{display:none;} main{padding:24px;} }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <h1>开发者笔记 01</h1>
+  <div class="sub">GAS 地基(第 2 章配套)<br>面向会一点 C# 的策划</div>
+  <a href="index.html">← 返回主文档</a>
+  <div class="grp">理解</div>
+  <a href="#goal">这章做完有什么</a>
+  <a href="#concepts">5 个概念的人话版</a>
+  <a href="#flow">数据流:一条血怎么扣</a>
+  <div class="grp">动手</div>
+  <a href="#attrs">类一 · MyAttributeSet</a>
+  <a href="#char">类二 · BaseCharacter</a>
+  <a href="#compile">编译</a>
+  <a href="#editor">编辑器四步配置</a>
+  <a href="#accept">验收</a>
+  <div class="grp">救急</div>
+  <a href="#errors">常见报错速查</a>
+  <a href="#faq">你一定会问的问题</a>
+</nav>
+
+<main>
+
+<!-- ============ 目标 ============ -->
+<section id="goal">
+  <h2>这章做完有什么</h2>
+  <p>两个 C++ 类 + 三个编辑器资产,构成整个战斗系统的地基。做完后:</p>
+  <ul>
+    <li>任何角色(主角/小兵/Boss)继承 <code>BaseCharacter</code> 就自带"战斗大脑"(ASC)和"属性表"(HP/体力)。</li>
+    <li>之后所有技能、伤害、Buff 都<strong>不再写 C++</strong>,全在蓝图里配——这正是选 GAS 的理由。</li>
+    <li>PIE 时控制台能实时看到角色的 HP/体力数值。</li>
+  </ul>
+  <div class="card">
+    <h4>本章产出清单</h4>
+    <table>
+      <tr><th>产出</th><th>类型</th><th>一句话作用</th></tr>
+      <tr><td><code>Source/ProjectUnreal/MyAttributeSet.h/.cpp</code></td><td><span class="tag t-cpp">C++</span></td><td>定义属性字段:Health/MaxHealth/Stamina/MaxStamina + 伤害通道 Damage</td></tr>
+      <tr><td><code>Source/ProjectUnreal/BaseCharacter.h/.cpp</code></td><td><span class="tag t-cpp">C++</span></td><td>角色基类:挂 ASC、出生时打初始化 GE</td></tr>
+      <tr><td><code>GE_InitAttributes</code></td><td><span class="tag t-bp">蓝图</span></td><td>"出生满状态"这条规则</td></tr>
+      <tr><td><code>BP_BaseCharacter</code></td><td><span class="tag t-bp">蓝图</span></td><td>C++ 基类的蓝图子类,放进关卡测试用</td></tr>
+      <tr><td>GameplayTag 树根</td><td><span class="tag t-design">配置</span></td><td><code>Ability</code> <code>State</code> <code>Event</code> 三个根标签</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 概念 ============ -->
+<section id="concepts">
+  <h2>5 个概念的人话版(C# 类比)</h2>
+  <p> tranek 文档看不懂,是因为它假设你已经知道这些概念在解决什么问题。先用 C# 把心智模型立起来:</p>
+  <table>
+    <tr><th>GAS 概念</th><th>C# 类比</th><th>人话解释</th></tr>
+    <tr><td><strong>ASC</strong><br>(AbilitySystemComponent)</td><td>挂在角色 GameObject 上的 <code>CombatBrain : MonoBehaviour</code></td><td>角色的"战斗大脑"。属性表、技能列表、正在生效的 Buff,全都由它持有和管理。一个角色一个。</td></tr>
+    <tr><td><strong>AttributeSet</strong></td><td><code>class Stats { float Health; float MaxHealth; ... }</code></td><td>属性字段的<strong>定义</strong>。相当于 Excel 表的表头——只规定"有哪些列",具体数值存在每个角色自己的实例里。<strong>全项目唯一必须写 C++ 的部分</strong>(官方不支持蓝图创建)。</td></tr>
+    <tr><td><strong>GE</strong><br>(GameplayEffect)</td><td>一条配置数据:<code>{ target:"Health", op:"Add", value:-50 }</code></td><td>"修改属性的一条规则"。伤害 -50、体力 -20、每秒回 5 血,都是 GE。<strong>纯蓝图资产</strong>,策划改数值不动代码,这是策划的主战场。</td></tr>
+    <tr><td><strong>GA</strong><br>(GameplayAbility)</td><td>一个技能的协程流程:<code>IEnumerator AttackCombo()</code></td><td>"一个技能的完整流程":播动画 → 等命中帧 → 做判定 → 打 GE。第 4 章才开始写,本章不涉及。</td></tr>
+    <tr><td><strong>GameplayTag</strong></td><td>带层级的字符串枚举:<code>"State.Invulnerable"</code></td><td>贴在角色身上的"状态贴纸"。伤害结算时查"有没有无敌贴纸",有就免伤。比 bool 强在:层级匹配、可在编辑器统一管理、网络同步。</td></tr>
+  </table>
+  <div class="note"><strong>一句话串起来</strong>:ASC 是大脑,AttributeSet 是它手里的属性表,GE 是改表的规则,GA 是按顺序打 GE 的流程,Tag 是流程中互相识别用的贴纸。</div>
+
+  <h3>为什么是 FGameplayAttributeData 而不是普通 float?</h3>
+  <p>这是读 tranek 时第一个看不懂的地方。原因:</p>
+  <ul>
+    <li>GAS 需要<strong>监听属性变化</strong>(UI 血条要刷新)、<strong>记录 Base 值与 Current 值</strong>(Buff 加的是临时修正,卸下装备要还原)。普通 float 做不到,所以包了一层结构体。</li>
+    <li>类比 C#:不是 <code>float Health</code>,而是 <code>ObservableValue&lt;float&gt; Health</code>——带变更事件的值。</li>
+    <li>所以读写属性要用宏生成的 <code>GetHealth() / SetHealth(x)</code>,不能直接赋值(赋值会绕过通知机制)。</li>
+  </ul>
+</section>
+
+<!-- ============ 数据流 ============ -->
+<section id="flow">
+  <h2>数据流:一条血怎么扣</h2>
+  <p>理解这条链路,本章代码每一行都知道在干嘛(命中判定部分第 4 章才做,先知道全貌):</p>
+  <pre>攻击方 GA 对目标打 GE_Damage(规则:Damage 属性 +50)
+  → 目标 ASC 收到,修改 Damage 属性
+  → 目标 AttributeSet.PostGameplayEffectExecute() 被回调  ← 本章写的代码
+      读到 Damage=50 → Health -= 50 → Damage 清零(它只是临时通道)
+  → PreAttributeChange 把 Health 钳制在 [0, MaxHealth]     ← 本章写的代码
+  → UI 监听 Health 变化刷新血条                             ← 第 8 章</pre>
+  <div class="note warn"><strong>为什么不直接让 GE 减 Health?</strong>因为伤害结算前要做事:查无敌 Tag、算防御减免、记录死亡。GE 只是"送数据的包裹",<code>PostGameplayEffectExecute</code> 是"拆包裹后的处理台"。这个"元属性(Meta Attribute)过一手"的模式是 GAS 伤害的标准做法。</div>
+</section>
+
+<!-- ============ AttributeSet ============ -->
+<section id="attrs">
+  <h2>类一 · MyAttributeSet <span class="tag t-cpp">C++</span></h2>
+  <p>创建方式:编辑器 Tools → New C++ Class → 右上角 All Classes 搜 <code>AttributeSet</code> → 命名 <code>MyAttributeSet</code>。然后把两个文件内容替换为下面代码(也可以直接手建文件,路径 <code>Source/ProjectUnreal/</code>)。</p>
+
+  <h3>MyAttributeSet.h(完整代码)</h3>
+<pre><code>#pragma once
+
+#include "CoreMinimal.h"
+#include "AttributeSet.h"
+#include "AbilitySystemComponent.h"
+#include "MyAttributeSet.generated.h"
+
+// 这个宏为每个属性一次性生成 4 个助手函数:
+//   GetHealthAttribute() / GetHealth() / SetHealth(x) / InitHealth(x)
+// 类比 C#:相当于自动属性 { get; set; } 的 GAS 版,但走的是通知管线
+#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
+
+UCLASS()
+class PROJECTUNREAL_API UMyAttributeSet : public UAttributeSet
+{
+	GENERATED_BODY()
+
+public:
+	UMyAttributeSet();
+
+	// ---- 生命 ----
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes")
+	FGameplayAttributeData Health;
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Health)
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes")
+	FGameplayAttributeData MaxHealth;
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxHealth)
+
+	// ---- 体力 ----
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes")
+	FGameplayAttributeData Stamina;
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Stamina)
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes")
+	FGameplayAttributeData MaxStamina;
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxStamina)
+
+	// ---- 元属性:伤害临时通道(见"数据流"一节的解释) ----
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes|Meta")
+	FGameplayAttributeData Damage;
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Damage)
+
+	// 属性即将变化:在这里钳制(Clamp)
+	virtual void PreAttributeChange(const FGameplayAttribute&amp; Attribute, float&amp; NewValue) override;
+
+	// GE 结算完成之后:在这里做"拆包裹"处理
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData&amp; Data) override;
+};</code></pre>
+
+  <h4>头文件逐段解释</h4>
+  <table>
+    <tr><th style="width:220px">代码</th><th>解释</th></tr>
+    <tr><td><code>#include "...generated.h"</code></td><td>UE 反射系统的生成头,<strong>必须是最后一个 include</strong>,顺序错了直接编译失败(新手最常踩)。类比 C# 的分部类自动生成的另一半。</td></tr>
+    <tr><td><code>UCLASS() / GENERATED_BODY()</code></td><td>告诉 UE"这个类要被反射"(蓝图可见、GC 管理、序列化)。类比 C# 的 <code>[Serializable]</code> + 注册进类型系统。</td></tr>
+    <tr><td><code>PROJECTUNREAL_API</code></td><td>dll 导出宏,跨模块可见。类比 C# 的 <code>public</code> 程序集边界。</td></tr>
+    <tr><td><code>UPROPERTY(...)</code></td><td>让字段被 UE 管理(垃圾回收/编辑器可见)。<code>BlueprintReadOnly</code> = 蓝图能读不能写。</td></tr>
+    <tr><td><code>FGameplayAttributeData</code></td><td>上一节说的"带通知的 float"。</td></tr>
+    <tr><td><code>ATTRIBUTE_ACCESSORS(...)</code></td><td>展开成 4 个函数声明。tranek 的宏,社区标准写法,照抄即可。</td></tr>
+  </table>
+
+  <h3>MyAttributeSet.cpp(完整代码)</h3>
+<pre><code>#include "MyAttributeSet.h"
+
+UMyAttributeSet::UMyAttributeSet()
+{
+	// 构造函数里的默认值,只影响"白板"状态
+	// 真正的出生数值由 GE_InitAttributes 给(策划可在蓝图里随时改)
+	InitHealth(100.f);
+	InitMaxHealth(100.f);
+	InitStamina(100.f);
+	InitMaxStamina(100.f);
+}
+
+void UMyAttributeSet::PreAttributeChange(const FGameplayAttribute&amp; Attribute, float&amp; NewValue)
+{
+	Super::PreAttributeChange(Attribute, NewValue);
+
+	// 任何属性变化前都会经过这里,把 NewValue 钳到合法区间
+	if (Attribute == GetHealthAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+	}
+	else if (Attribute == GetStaminaAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxStamina());
+	}
+}
+
+void UMyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData&amp; Data)
+{
+	Super::PostGameplayEffectExecute(Data);
+
+	// 每个 GE 结算完都会回调这里。Data 里装着"谁打的、改了哪个属性、改了多少"
+	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
+	{
+		// 1. 读出这次伤害
+		const float LocalDamage = GetDamage();
+		// 2. 立刻清零:Damage 只是临时通道,不能留着,否则下次会叠加
+		SetDamage(0.f);
+
+		if (LocalDamage &gt; 0.f)
+		{
+			// 3. 真正扣血(第 5 章会在这里加:查 State.Invulnerable 免伤)
+			SetHealth(FMath::Clamp(GetHealth() - LocalDamage, 0.f, GetMaxHealth()));
+		}
+	}
+}</code></pre>
+  <div class="note ok"><strong>写完自检</strong>:如果将来问"受到伤害时我的代码在哪执行?"——答案是 <code>PostGameplayEffectExecute</code> 里那个 if。所有伤害、回血、体力消耗,最终都汇聚到这一个函数里分流。这就是 GAS"数值逻辑集中化"的体现。</div>
+</section>
+
+<!-- ============ BaseCharacter ============ -->
+<section id="char">
+  <h2>类二 · BaseCharacter <span class="tag t-cpp">C++</span></h2>
+  <p>New C++ Class → 父类 <code>Character</code> → 命名 <code>BaseCharacter</code>。主角、小兵、Boss 以后都继承它。</p>
+
+  <h3>BaseCharacter.h(完整代码)</h3>
+<pre><code>#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
+#include "BaseCharacter.generated.h"
+
+class UAbilitySystemComponent;
+class UMyAttributeSet;
+class UGameplayEffect;
+
+UCLASS()
+class PROJECTUNREAL_API ABaseCharacter : public ACharacter, public IAbilitySystemInterface
+{
+	GENERATED_BODY()
+
+public:
+	ABaseCharacter();
+
+	// IAbilitySystemInterface 要求的唯一函数:
+	// 让 GAS 系统能通过 GetAbilitySystemComponent() 找到这个角色的 ASC
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+protected:
+	virtual void BeginPlay() override;
+
+	// 战斗大脑(ASC),构造时创建
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	TObjectPtr&lt;UAbilitySystemComponent&gt; AbilitySystemComponent;
+
+	// 属性表实例,构造时创建
+	UPROPERTY()
+	TObjectPtr&lt;const UMyAttributeSet&gt; AttributeSet;
+
+	// 出生时要打给自己的 GE,在蓝图子类里填 GE_InitAttributes
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS")
+	TSubclassOf&lt;UGameplayEffect&gt; InitAttributesEffect;
+};</code></pre>
+
+  <h3>BaseCharacter.cpp(完整代码)</h3>
+<pre><code>#include "BaseCharacter.h"
+#include "AbilitySystemComponent.h"
+#include "MyAttributeSet.h"
+
+ABaseCharacter::ABaseCharacter()
+{
+	PrimaryActorTick.bCanEverTick = false;
+
+	// 类比 Unity:gameObject.AddComponent&lt;AbilitySystemComponent&gt;()
+	AbilitySystemComponent = CreateDefaultSubobject&lt;UAbilitySystemComponent&gt;(TEXT("AbilitySystemComponent"));
+
+	// 属性表也跟着角色走
+	AttributeSet = CreateDefaultSubobject&lt;UMyAttributeSet&gt;(TEXT("AttributeSet"));
+}
+
+UAbilitySystemComponent* ABaseCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void ABaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 出生:如果蓝图子类里填了初始化 GE,就打给自己
+	if (AbilitySystemComponent &amp;&amp; InitAttributesEffect)
+	{
+		// 这三行是"打一个 GE"的标准样板,以后每次手动打 GE 都这么写:
+		// 1) 造上下文(谁打的、打谁的)
+		FGameplayEffectContextHandle Context = AbilitySystemComponent-&gt;MakeEffectContext();
+		Context.AddSourceObject(this);
+		// 2) 按 GE 资产造出一份"规则说明书"(Spec),等级 1
+		const FGameplayEffectSpecHandle Spec = AbilitySystemComponent-&gt;MakeOutgoingSpec(InitAttributesEffect, 1.f, Context);
+		// 3) 对自己执行
+		if (Spec.IsValid())
+		{
+			AbilitySystemComponent-&gt;ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+		}
+	}
+}</code></pre>
+  <div class="note"><strong>单机 demo 的简化说明</strong>:官方多人游戏标准做法是把 ASC 挂在 PlayerState 上(玩家死亡重生不丢战斗状态)、并开启 ASC 复制(Replication)。我们是单机 demo,直接挂 Character、不配网络,完全够用。面试时知道标准做法即可,tranek §4.1 有讲。</div>
+</section>
+
+<!-- ============ 编译 ============ -->
+<section id="compile">
+  <h2>编译</h2>
+  <ol>
+    <li>确保编辑器<strong>开着</strong>,按 <code>Ctrl + Alt + F11</code>(Live Coding 热编译),右下角看进度。</li>
+    <li>成功:右下角弹 "Live Coding: Patch Successful"。</li>
+    <li>失败:点右下角日志看第一条 error,<strong>别看 warning</strong>;把第一条 error 贴给 AI。常见错误先看本文 <a href="#errors">常见报错速查</a>。</li>
+  </ol>
+  <div class="note warn"><strong>如果 Live Coding 死活不行</strong>:关闭编辑器,在 Git Bash 里跑 UBT 全量编译(就是第 1 章那条命令):
+  <pre>/e/UE_5.8/Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe \
+  /e/UE_5.8/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.dll \
+  ProjectUnrealEditor Win64 Development \
+  -project="E:\UE5.8Project\ProjectUnreal\ProjectUnreal.uproject" -waitmutex</pre></div>
+</section>
+
+<!-- ============ 编辑器 ============ -->
+<section id="editor">
+  <h2>编辑器四步配置</h2>
+
+  <h3>第 1 步:录入 GameplayTag 根</h3>
+  <ol>
+    <li>菜单 Edit → Project Settings → 左侧搜 <code>GameplayTags</code> → Gameplay Tags 页签。</li>
+    <li>Gameplay Tag List 点 <code>+</code>,依次添加三个根标签:<code>Ability</code>、<code>State</code>、<code>Event</code>。</li>
+    <li>子标签(<code>State.Invulnerable</code> 等)后面章节用到再加,先只立三根。</li>
+  </ol>
+
+  <h3>第 2 步:做 GE_InitAttributes(第一个 GameplayEffect)</h3>
+  <ol>
+    <li>内容浏览器新建文件夹 <code>Content/GAS/GE/</code> → 右键 → Gameplay → <strong>Gameplay Effect</strong> → 命名 <code>GE_InitAttributes</code>。</li>
+    <li>双击打开,设置:
+      <ul>
+        <li><strong>Duration Policy</strong> = <code>Instant</code>(立即生效,不是持续 Buff)</li>
+        <li><strong>Modifiers</strong> 点 <code>+</code> 加 4 条,每条设置:
+          <table>
+            <tr><th>Attribute</th><th>Modifier Op</th><th>Magnitude</th></tr>
+            <tr><td>MaxHealth</td><td>Override</td><td>100</td></tr>
+            <tr><td>Health</td><td>Override</td><td>100</td></tr>
+            <tr><td>MaxStamina</td><td>Override</td><td>100</td></tr>
+            <tr><td>Stamina</td><td>Override</td><td>100</td></tr>
+          </table>
+        </li>
+      </ul>
+    </li>
+  </ol>
+  <div class="note"><strong>这一大步在干嘛</strong>:这就是"策划配数值"的标准姿势。以后想调成出生 80% 血、Boss 5000 血,都是改/新建这种 GE 资产,不碰代码。<code>Override</code> 是直接赋值;以后伤害 GE 用 <code>Add</code> -50。</div>
+
+  <h3>第 3 步:建 BP_BaseCharacter</h3>
+  <ol>
+    <li>内容浏览器 <code>Content/GAS/</code> 下右键 → Blueprint Class → All Classes 搜 <code>BaseCharacter</code>(我们的 C++ 类)→ 命名 <code>BP_BaseCharacter</code>。</li>
+    <li>双击打开,右侧 Details 面板搜 <code>Init Attributes Effect</code> → 选 <code>GE_InitAttributes</code>。</li>
+    <li>随便给个能看见的模型:选中 Mesh 组件,Skeletal Mesh 可先用引擎自带 <code>SKM_Manny_Simple</code>(第 3 章再换 Greystone)。</li>
+    <li>Details 搜 <code>Auto Possess Player</code> → 设为 <code>Player 0</code>(让 PIE 时玩家直接控制它,验收的 showdebug 需要)。</li>
+    <li>编译保存。</li>
+  </ol>
+
+  <h3>第 4 步:放进关卡</h3>
+  <ol>
+    <li>把 <code>BP_BaseCharacter</code> 拖进关卡地面附近。</li>
+    <li>保存关卡(建议 <code>Content/Maps/L_TestGAS</code>)。</li>
+  </ol>
+</section>
+
+<!-- ============ 验收 ============ -->
+<section id="accept">
+  <h2>验收</h2>
+  <ol>
+    <li>PIE(Alt+P)运行。</li>
+    <li>按 <code>`</code>(Tab 上面那个键)开控制台,输入 <code>showdebug abilitysystem</code> 回车。</li>
+    <li>屏幕左侧出现调试面板,能看到:
+      <ul>
+        <li><code>Health: 100</code> <code>MaxHealth: 100</code></li>
+        <li><code>Stamina: 100</code> <code>MaxStamina: 100</code></li>
+        <li>Owned Tags / GameplayEffects 区域存在(此时为空属正常)</li>
+      </ul>
+    </li>
+    <li>选中关卡里的角色,Details 面板能看到 <code>Ability System Component</code> 组件。</li>
+  </ol>
+  <div class="note ok"><strong>看到数值 = 本章通关</strong>。此时伤害管线虽然还没有攻击技能,但"打 GE → PostGameplayEffectExecute 扣血"已经可以用控制台验证:<code>ke * Damage 50</code> 之类的玩法属于进阶,不强求。然后:填主文档第 2 章执行记录 → 状态改完成 → git commit。</div>
+</section>
+
+<!-- ============ 报错 ============ -->
+<section id="errors">
+  <h2>常见报错速查</h2>
+  <table>
+    <tr><th style="width:280px">报错(关键词)</th><th>原因与解法</th></tr>
+    <tr><td><code>generated.h file should be included last</code></td><td>include 顺序:generated.h 必须是最后一个。</td></tr>
+    <tr><td><code>unresolved external symbol</code> + GAS 相关符号 / LNK2019</td><td>模块没依赖 GAS。检查 <code>ProjectUnreal.Build.cs</code> 里有 <code>GameplayAbilities, GameplayTags, GameplayTasks</code>。改 Build.cs 后需重新生成工程文件再编译。</td></tr>
+    <tr><td><code>'UAttributeSet': base class undefined</code> / 找不到 AttributeSet.h</td><td>头文件没引对:<code>#include "AttributeSet.h"</code>,且 .h 里要 <code>#include "AbilitySystemComponent.h"</code>(宏需要)。</td></tr>
+    <tr><td><code>GetHealthAttribute is not a member</code></td><td><code>ATTRIBUTE_ACCESSORS</code> 宏漏写或类名/属性名与 UPROPERTY 不一致(大小写敏感)。</td></tr>
+    <tr><td>Live Coding 失败但报错看不懂</td><td>关编辑器走 UBT 全量编译(见"编译"一节),错误信息更完整。头文件结构改动大时 Live Coding 本来就经常不行。</td></tr>
+    <tr><td>PIE 后 <code>showdebug abilitysystem</code> 什么都没有</td><td>① 角色没设 Auto Possess Player = Player 0;② 关卡里放的是旧的默认 Pawn 不是 BP_BaseCharacter;③ BP 里没填 InitAttributesEffect。</td></tr>
+    <tr><td>GE 的 Modifiers 里找不到 Health 属性</td><td>MyAttributeSet 还没编译成功,或编译后没重启过 GE 编辑器——先保证 C++ 编译通过。</td></tr>
+  </table>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq">
+  <h2>你一定会问的问题</h2>
+  <div class="card">
+    <h4>Q:数值为什么一份写 C++ 构造函数(100),一份又写 GE(100)?</h4>
+    <p>C++ 里的是"编译期默认值",防白板;真正生效的是 GE——因为 GE 是策划可以随时改、可以按等级缩放的资产。<strong>改数值永远改 GE,不改 C++</strong>。</p>
+    <h4>Q:Damage 这个属性会显示在面板上吗?要存盘吗?</h4>
+    <p>不需要。它是"元属性"——只在一次 GE 结算的瞬间存在的临时通道,用完即清零(我们代码里 <code>SetDamage(0.f)</code>)。</p>
+    <h4>Q:为什么 BaseCharacter 头文件里用 <code>TObjectPtr&lt;&gt;</code> 而不是裸指针?</h4>
+    <p>UE5 的 UPROPERTY 指针标准写法,等价于 UE4 的裸 UPROPERTY 指针,编辑器里序列化更安全。照抄即可。</p>
+    <h4>Q:我看 Narxim 示例里还有一大堆类(PlayerState、GameMode…),我们都需要吗?</h4>
+    <p>不需要。Narxim 演示的是多人完整架构。我们的精简版:本章 2 个类,后面按需加(敌人 AI 控制器、Boss 阶段等)。<strong>少即是多,能跑最重要</strong>。</p>
+    <h4>Q:写完这章,下次打开工程还要重新编译吗?</h4>
+    <p>不用。编译产物在 <code>Binaries/</code> 里,双击 .uproject 直接开。只有改了 C++ 才要再编译。</p>
+  </div>
+</section>
+
+</main>
+</body>
+</html>
