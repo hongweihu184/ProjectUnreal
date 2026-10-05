@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>故障速查手册 · UE 环境与编译 · 魂类 ARPG Demo</title>
+<style>
+  :root{
+    --bg:#14161a; --bg2:#1c1f26; --bg3:#242833; --fg:#d8dce4; --dim:#8a91a0;
+    --accent:#c8a15a; --accent2:#7aa2f7; --ok:#6fbf73; --warn:#e0a050; --bad:#e06060;
+    --border:#2e3340;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--fg); font:15px/1.75 "Microsoft YaHei","PingFang SC",sans-serif;
+       display:flex; min-height:100vh;}
+  nav{width:250px; flex:0 0 250px; background:var(--bg2); border-right:1px solid var(--border);
+      position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 14px;}
+  nav h1{font-size:16px; color:var(--accent); margin-bottom:4px;}
+  nav .sub{font-size:12px; color:var(--dim); margin-bottom:16px;}
+  nav a{display:block; color:var(--fg); text-decoration:none; font-size:13.5px;
+        padding:5px 10px; border-radius:6px; border-left:2px solid transparent;}
+  nav a:hover{background:var(--bg3);}
+  nav .grp{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin:14px 0 4px 10px;}
+  main{flex:1; max-width:920px; padding:40px 48px 120px;}
+  section{margin-bottom:40px;}
+  h2{font-size:24px; color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:16px;}
+  h3{font-size:18px; color:var(--accent2); margin:24px 0 10px;}
+  h4{font-size:15.5px; margin:18px 0 8px; color:var(--fg);}
+  p{margin:8px 0;}
+  ul,ol{margin:8px 0 8px 24px;}
+  li{margin:3px 0;}
+  code{background:var(--bg3); padding:1px 6px; border-radius:4px; font-family:Consolas,monospace; font-size:13px; color:#e8c07d;}
+  pre{background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:14px 16px;
+      overflow-x:auto; margin:10px 0; font-family:Consolas,monospace; font-size:13px; line-height:1.55;}
+  pre code{background:none; padding:0; color:var(--fg);}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13.5px;}
+  th{background:var(--bg3); color:var(--accent); text-align:left;}
+  th,td{border:1px solid var(--border); padding:7px 10px; vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .card{background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin:12px 0;}
+  .note{border-left:3px solid var(--accent2); background:var(--bg2); padding:10px 16px; margin:12px 0; border-radius:0 8px 8px 0;}
+  .warn{border-left:3px solid var(--warn);}
+  .bad{border-left:3px solid var(--bad);}
+  .ok{border-left:3px solid var(--ok);}
+  .fix{display:inline-block; font-size:11px; padding:1px 8px; border-radius:10px; background:#23402a; color:var(--ok); margin-right:6px;}
+  .sym{color:#e06060; font-family:Consolas,monospace; font-size:13px;}
+  a{color:var(--accent2);}
+  .meta{color:var(--dim); font-size:12.5px;}
+  @media (max-width:900px){ nav{display:none;} main{padding:24px;} }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <h1>故障速查手册</h1>
+  <div class="sub">UE 环境与编译问题<br>症状 → 快速解法<br>用法:Ctrl+F 搜报错关键词</div>
+  <a href="index.html">← 返回主文档</a>
+  <a href="gas-foundation.html">开发者笔记 01</a>
+  <div class="grp">速查</div>
+  <a href="#quick">30 秒速查表</a>
+  <a href="#workflow">日常编译工作流</a>
+  <div class="grp">VS / IntelliSense</div>
+  <a href="#p1">P1 满屏红波浪线</a>
+  <a href="#p2">P2 生成解决方案刷错误</a>
+  <div class="grp">UBT 编译</div>
+  <a href="#p3">P3 Live Coding 被锁</a>
+  <a href="#p4">P4 Live Coding 假成功</a>
+  <a href="#p5">P5 插件 rules 找不到</a>
+  <a href="#p6">P6 预编译 rules 不存在</a>
+  <a href="#p7">P7 误触发全引擎重编译</a>
+  <a href="#p8">P8 BuildSettings 冲突</a>
+  <a href="#p9">P9 插件名不存在</a>
+  <a href="#p10">P10 UBT 要 .NET 10</a>
+  <a href="#p11">P11 C2027 未定义类型</a>
+  <div class="grp">其他</div>
+  <a href="#p12">P12 git push 连接重置</a>
+  <a href="#p13">P13 引擎首次启动慢</a>
+</nav>
+
+<main>
+
+<!-- ============ 速查表 ============ -->
+<section id="quick">
+  <h2>30 秒速查表</h2>
+  <p>遇到编译/环境问题,先在这里对号;点现象跳转到完整解法。</p>
+  <table>
+    <tr><th>你看到的现象(关键词)</th><th>一句话解法</th></tr>
+    <tr><td><a href="#p3">"Unable to build while Live Coding is active" / VS 退出代码 8</a></td><td>编辑器开着 → 在编辑器里按 Ctrl+Alt+F11,或关编辑器再编</td></tr>
+    <tr><td><a href="#p2">VS"生成解决方案"一堆项目失败,退出代码 6</a></td><td>正常现象。只生成 ProjectUnreal 项目,永远不生成解决方案</td></tr>
+    <tr><td><a href="#p1">红波浪线、"无法打开 CoreMinimal.h"、GENERATED_BODY 未定义</a></td><td>IntelliSense 假错误 → 重新生成工程文件</td></tr>
+    <tr><td><a href="#p4">Live Coding 显示 "Target is up to date" 但代码明明是新的</a></td><td>清单损坏 → 关编辑器,删 LiveCoding*.json,全量编译</td></tr>
+    <tr><td><a href="#p5">"Expecting to find a type ... module rules named '插件名'"</a></td><td>启动器版引擎加插件的规则冲突 → 禁用该插件或装到工程 Plugins/ 下</td></tr>
+    <tr><td><a href="#p6">"Precompiled rules assembly 'UE5Rules.dll' does not exist"</a></td><td>Epic 启动器 → 库 → UE5.8 → 验证</td></tr>
+    <tr><td><a href="#p7">编译开始跑几千个任务(Module.Core.*.cpp)</a></td><td>立刻停止!恢复 InstalledBuild.txt 标记</td></tr>
+    <tr><td><a href="#p8">"modifies the values of properties ... not allowed"</a></td><td>Target.cs 的 BuildSettingsVersion 改 V7</td></tr>
+    <tr><td><a href="#p11">"error C2027: 使用了未定义类型 FGameplayEffectModCallbackData"</a></td><td>cpp 里补 #include "GameplayEffectExtension.h"</td></tr>
+    <tr><td><a href="#p12">git push "Connection was reset"</a></td><td>给 git 配本机代理(见 P12)</td></tr>
+  </table>
+</section>
+
+<!-- ============ 工作流 ============ -->
+<section id="workflow">
+  <h2>日常编译工作流(背下来,80% 的问题不会发生)</h2>
+  <div class="card">
+    <h4>编译只认两条路</h4>
+    <table>
+      <tr><th>场景</th><th>操作</th></tr>
+      <tr><td>UE 编辑器<strong>开着</strong></td><td>保存代码(Ctrl+S)→ 编辑器里按 <code>Ctrl+Alt+F11</code>(Live Coding 热补丁)</td></tr>
+      <tr><td>编辑器<strong>关着</strong></td><td>命令行 UBT 全量编译(命令见 P3);或 VS 里右键 ProjectUnreal 项目 → 生成</td></tr>
+    </table>
+    <h4>三条铁律</h4>
+    <ol>
+      <li><strong>永不点"生成解决方案"</strong>——只生成 ProjectUnreal 项目。引擎自带的测试项目在启动器版引擎上永远编不过,与你的代码无关。</li>
+      <li><strong>判断代码对错只看编译结果</strong>(UBT 输出 / Live Coding 弹窗),VS 红波浪线是 IntelliSense 的猜测,仅供参考。错误列表筛选设"仅生成"。</li>
+      <li><strong>新建 C++ 类 / 加插件 / 红线异常增多</strong> → 重新生成工程文件:
+      <pre>/e/UE_5.8/Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe \
+  /e/UE_5.8/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.dll \
+  -projectfiles -project="E:\UE5.8Project\ProjectUnreal\ProjectUnreal.uproject" -game -rocket -progress</pre></li>
+    </ol>
+  </div>
+  <div class="note bad"><strong>血的教训:不要碰引擎目录里的东西</strong>。<code>E:\UE_5.8\Engine\</code> 下的缓存/标记文件(Intermediate/Build/BuildRules、InstalledBuild.txt)删了会导致引擎自身无法构建,修复只能靠 Epic 启动器"验证"。要清理只清<strong>工程目录</strong>(E:\UE5.8Project\ProjectUnreal)下的 Intermediate、Binaries、.vs。</div>
+</section>
+
+<!-- ============ P1 ============ -->
+<section id="p1">
+  <h2>P1 · VS 满屏红波浪线 / "无法打开 CoreMinimal.h" <span class="fix">已解决</span></h2>
+  <p class="sym">症状:无法打开 源 文件 "CoreMinimal.h" / "AttributeSet.h";未定义标识符 "GENERATED_BODY";缺少显式类型(假定"int");应输入";"</p>
+  <h4>定性</h4>
+  <p>全部是 <strong>IntelliSense 假错误</strong>,不是编译错误。VS 的实时分析读不懂 UE 的宏体系。真正的判官是编译器。</p>
+  <h4>快速解法(按顺序试)</h4>
+  <ol>
+    <li><strong>确认文件是从"解决方案资源管理器"里打开的</strong>(不是从磁盘拖进来的"杂项文件")。</li>
+    <li><strong>重新生成工程文件</strong>(命令见"工作流"铁律 3)——最常见有效,刷新 IntelliSense 的 include 路径。新建类/改插件后必做。</li>
+    <li>错误列表筛选改"<strong>仅生成</strong>",只看真编译错误。</li>
+    <li>还难受:工具 → 选项 → 文本编辑器 → C/C++ → 高级 → IntelliSense → "禁用错误报告"=True、"禁用波形曲线"=True。</li>
+    <li>终极:关 VS,删工程根目录的 <code>.vs</code> 隐藏缓存文件夹,重开等它重建索引。</li>
+  </ol>
+  <div class="note"><strong>根治方案</strong>:JetBrains Rider for Unreal(非商业用途免费)能真正解析 UE 宏,红线/跳转/补全全部正常。代价:约 10GB 磁盘 + 运行时 4-6GB 内存,16GB 内存机器与 UE 编辑器同开会紧张。</div>
+</section>
+
+<!-- ============ P2 ============ -->
+<section id="p2">
+  <h2>P2 · VS"生成解决方案"一堆项目失败(退出代码 6) <span class="fix">已定性</span></h2>
+  <p class="sym">症状:LiveLinkHub / IoStoreOnDemandTests / EventLoopUnitTests / ChaosTestHarness / DotNetPerforceLib 失败;"Program targets are not currently supported from this engine distribution"</p>
+  <h4>定性</h4>
+  <p><strong>正常现象,永远无视</strong>。这些是引擎源码附带的测试/工具程序,启动器版(预编译)引擎本来就不支持编译它们。</p>
+  <h4>正确操作</h4>
+  <p>右键解决方案资源管理器里的 <strong>ProjectUnreal 项目</strong>(Games 文件夹下)→ 生成。只关心 <code>ProjectUnreal</code> 相关输出行。</p>
+</section>
+
+<!-- ============ P3 ============ -->
+<section id="p3">
+  <h2>P3 · "Unable to build while Live Coding is active" / 退出代码 8 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:VS 或命令行编译失败:Unable to build while Live Coding is active. Exit the editor and game</p>
+  <h4>原因</h4>
+  <p>UE 编辑器开着,持有构建锁。外部(VS/命令行)全量编译被拒绝。</p>
+  <h4>解法</h4>
+  <p>二选一:① 在编辑器里按 <code>Ctrl+Alt+F11</code> 热编译(推荐,不用关编辑器);② 完全关闭编辑器再外部编译。</p>
+  <h4>命令行全量编译命令(备查)</h4>
+  <pre>/e/UE_5.8/Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe \
+  /e/UE_5.8/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.dll \
+  ProjectUnrealEditor Win64 Development \
+  -project="E:\UE5.8Project\ProjectUnreal\ProjectUnreal.uproject" -waitmutex</pre>
+</section>
+
+<!-- ============ P4 ============ -->
+<section id="p4">
+  <h2>P4 · Live Coding 假成功("up to date" 但新代码没编进去) <span class="fix">已解决</span></h2>
+  <p class="sym">症状:Ctrl+Alt+F11 显示 "Target is up to date" "Result: Succeeded",但代码明明是刚改的;伴随 "Unable to parse LiveCoding.json (missing LinkerPath field)"</p>
+  <h4>原因</h4>
+  <p>Live Coding 清单文件(<code>Engine/Intermediate/LiveCoding.json</code>)损坏(通常是被打断的编译造成的),整个热补丁管道空转。"Succeeded"是假象——什么都没编。</p>
+  <h4>验证方法</h4>
+  <p>对比 dll 和源码的时间戳:<code>Binaries/Win64/UnrealEditor-ProjectUnreal.dll</code> 比 <code>Source/</code> 里的 .cpp 旧 = 新代码没编进去。</p>
+  <h4>解法</h4>
+  <ol>
+    <li>完全关闭 UE 编辑器</li>
+    <li>删除 <code>E:\UE_5.8\Engine\Intermediate\LiveCoding.json</code> 和 <code>LiveCodingModules.json</code>(会自动重建)</li>
+    <li>命令行全量编译(命令见 P3)</li>
+    <li>重开编辑器,Live Coding 恢复正常</li>
+  </ol>
+  <div class="note warn"><strong>防再犯</strong>:不要在 Live Coding 补丁进行中强制关编辑器;机器内存不足时(可用 &lt;2GB)尽量避免热编译大改动。</div>
+</section>
+
+<!-- ============ P5 ============ -->
+<section id="p5">
+  <h2>P5 · "Expecting to find a type ... module rules named '插件名'" <span class="fix">已解决</span></h2>
+  <p class="sym">症状:启用某插件后编译失败:Expecting to find a type to be declared in a module rules named 'VisualStudioTools' in 'UE5Rules'</p>
+  <h4>原因</h4>
+  <p>启动器版引擎用<strong>预编译好的规则程序集</strong>(UE5Rules.dll),它出厂时不包含你后加插件的构建规则。启用插件后 UBT 从旧缓存里找不到规则类。</p>
+  <h4>解法(按推荐顺序)</h4>
+  <ol>
+    <li><strong>如果插件非必需:在 .uproject 里禁用它</strong>(删掉对应 Plugins 条目),最快。例:VisualStudioTools 只是 VS 辅助工具,VS2022 17.9+ 已自带虚幻集成。</li>
+    <li>如果需要:把插件从引擎目录移到<strong>工程的 Plugins/ 目录</strong>,让项目规则程序集接管它。</li>
+  </ol>
+  <div class="note bad"><strong>千万别做</strong>:不要试图删 <code>Engine/Intermediate/Build/BuildRules</code> 强制重编(会触发 P6),也不要删 <code>Engine/Build/InstalledBuild.txt</code>(会触发 P7 全引擎重编译)。这两个都是 2026-10-05 实际踩过的连环坑。</div>
+</section>
+
+<!-- ============ P6 ============ -->
+<section id="p6">
+  <h2>P6 · "Precompiled rules assembly 'UE5Rules.dll' does not exist" <span class="fix">已解决</span></h2>
+  <p class="sym">症状:编译失败:Precompiled rules assembly 'E:\UE_5.8\Engine\Intermediate\Build\BuildRules\UE5Rules.dll' does not exist</p>
+  <h4>原因</h4>
+  <p>引擎的预编译规则程序集被删了(通常是人为清理 Intermediate 时误删)。启动器版引擎被设计为"不重编此文件",自己补不回来。</p>
+  <h4>解法</h4>
+  <p><strong>Epic Games 启动器 → 库 → UE 5.8 → 下拉箭头 → "验证"(Verify)</strong>。扫描几分钟后自动重新下载缺失文件(只有几 MB)。</p>
+</section>
+
+<!-- ============ P7 ============ -->
+<section id="p7">
+  <h2>P7 · 误触发全引擎重编译(几千个任务) <span class="fix">已解决</span></h2>
+  <p class="sym">症状:编译任务数变成几千个([xx/4921]),开始编译 Module.Core.*.cpp 等引擎模块</p>
+  <h4>原因</h4>
+  <p><code>Engine/Build/InstalledBuild.txt</code> 标记丢失/被改名 → UBT 把引擎当成源码版,尝试重编整个引擎。16GB 内存机器上要跑好几个小时。</p>
+  <h4>解法</h4>
+  <ol>
+    <li><strong>立刻停止编译</strong></li>
+    <li>恢复 <code>E:\UE_5.8\Engine\Build\InstalledBuild.txt</code>(内容就一行 <code>UE_5.8</code>;或从 .bak 改回来)</li>
+    <li>若规则程序集也受损 → Epic 验证(P6)</li>
+  </ol>
+</section>
+
+<!-- ============ P8 ============ -->
+<section id="p8">
+  <h2>P8 · "modifies the values of properties ... not allowed" <span class="fix">已解决</span></h2>
+  <p class="sym">症状:ProjectUnrealEditor modifies the values of properties ... This is not allowed, as ... build products in common with UnrealEditor</p>
+  <h4>原因</h4>
+  <p>Target.cs 用了旧教程的 <code>BuildSettingsVersion.V5</code>,与 UE5.8 引擎共享构建环境冲突。</p>
+  <h4>解法</h4>
+  <p>两个 Target.cs 改为 <code>DefaultBuildSettings = BuildSettingsVersion.V7;</code>。教训:抄旧教程的 Target.cs 模板时,以引擎报错的提示版本为准。</p>
+</section>
+
+<!-- ============ P9 ============ -->
+<section id="p9">
+  <h2>P9 · "Unable to find plugin 'xxx'" <span class="fix">已解决</span></h2>
+  <p class="sym">症状:Unable to find plugin 'GameplayStateTreeModule' (referenced via ProjectUnreal.uproject)</p>
+  <h4>解法</h4>
+  <p>插件名写错了。用命令核对真实插件名(以 .uplugin 文件名为准):</p>
+  <pre>find /e/UE_5.8/Engine/Plugins -maxdepth 4 -iname "*.uplugin" | grep -i 关键词</pre>
+  <p>例:StateTree 插件真名是 <code>GameplayStateTree</code>,不是 GameplayStateTreeModule。</p>
+</section>
+
+<!-- ============ P10 ============ -->
+<section id="p10">
+  <h2>P10 · UBT 启动失败,要 .NET 10 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:直接运行 UnrealBuildTool.exe 提示需要 Microsoft.NETCore.App 10.0.0,系统只装到 9.x</p>
+  <h4>解法</h4>
+  <p>不用装系统级 .NET。UE5.8 自带,用它调 UBT:</p>
+  <pre>/e/UE_5.8/Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe \
+  /e/UE_5.8/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.dll [参数]</pre>
+</section>
+
+<!-- ============ P11 ============ -->
+<section id="p11">
+  <h2>P11 · error C2027: 使用了未定义类型 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:MyAttributeSet.cpp: error C2027: 使用了未定义类型"FGameplayEffectModCallbackData"</p>
+  <h4>原因</h4>
+  <p>该结构体在 <code>AttributeSet.h</code> 里只是前向声明,完整定义在 <code>GameplayEffectExtension.h</code>。<strong>这才是真编译错误</strong>——与 P1 的假错误对比学习:真错误有 error 编号、文件和行号,出现在 UBT/生成输出里。</p>
+  <h4>解法</h4>
+  <p>cpp 里补 <code>#include "GameplayEffectExtension.h"</code>。通用心法:某个类型"未定义"时,去引擎源码搜它的完整定义在哪个头文件(Grep 搜 <code>struct F名字</code>)。</p>
+</section>
+
+<!-- ============ P12 ============ -->
+<section id="p12">
+  <h2>P12 · git push 到 GitHub 连接被重置 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:fatal: unable to access 'https://github.com/...': Recv failure: Connection was reset</p>
+  <h4>原因</h4>
+  <p>本机代理软件(Clash 等)只对走系统代理的程序生效,git 默认直连。</p>
+  <h4>解法</h4>
+  <pre>git config --global http.proxy http://127.0.0.1:7897
+git config --global https.proxy http://127.0.0.1:7897</pre>
+  <p>代理软件关闭后若推送失败,取消:<code>git config --global --unset http.proxy</code>(https 同理)。端口以你的代理软件实际监听为准(<code>netstat -an | findstr LISTENING</code> 查)。</p>
+</section>
+
+<!-- ============ P13 ============ -->
+<section id="p13">
+  <h2>P13 · 引擎/编辑器首次启动特别慢 <span class="fix">正常现象</span></h2>
+  <p class="sym">症状:首次打开工程卡很久,日志狂刷 LogShaderCompilers;19GB 素材工程首次加载更慢</p>
+  <h4>定性</h4>
+  <p>首次启动要编译全部着色器变体 + 建立 DDC 缓存,<strong>正常现象,等</strong>。之后的启动会快很多。日志里 <code>Failed to load 'aqProf.dll' / 'VtuneApi.dll'</code> 是无害的可选性能分析工具缺失,忽略。</p>
+</section>
+
+</main>
+</body>
+</html>

@@ -84,6 +84,7 @@
   <a href="#ch10">第 10 章 · Boss 战</a>
   <a href="#ch11">第 11 章 · 打磨与打包</a>
   <div class="grp">附录</div>
+  <a href="troubleshooting.html">★ 故障速查手册</a>
   <a href="#appA">附录 A · 资源与参考链接</a>
   <a href="#appB">附录 B · 名词对照表</a>
   <a href="#appC">附录 C · 踩坑记录</a>
@@ -507,6 +508,7 @@
 <section id="appC">
   <h2>附录 C · 踩坑记录</h2>
   <p class="meta">每个坑按「现象 → 原因 → 解法 → 教训」记录。预期会有：编译错误、资产路径、动画通知不触发、GE 不生效、AI 不动、打包失败……</p>
+  <div class="note ok"><strong>环境与编译类问题已单独成册</strong>:<a href="troubleshooting.html">故障速查手册</a>——按报错关键词索引(P1~P13),含 2026-10-05 连环坑(VisualStudioTools 插件 → rules 缓存 → Live Coding 假成功)的完整解法。本表只记录玩法/资产向的坑。</div>
   <table>
     <tr><th style="width:60px">编号</th><th>现象</th><th>原因</th><th>解法</th><th>教训</th></tr>
     <tr><td>C-1</td><td>首次 UBT 编译直接失败：报 "modifies the values of properties ... not allowed, build products in common with UnrealEditor"</td><td>Target.cs 用了 <code>BuildSettingsVersion.V5</code>，与引擎共享构建环境冲突（UE5.8 默认已升级）</td><td>两个 Target.cs 改为 <code>DefaultBuildSettings = BuildSettingsVersion.V7;</code></td><td>新版本引擎建 C++ 工程，抄旧教程的 V5 会踩坑；报错信息本身给了答案，先读完报错再改</td></tr>
