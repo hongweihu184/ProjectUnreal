@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>开发者笔记 02 · 代码精读:我们写过的每一行 · 魂类 ARPG Demo</title>
+<style>
+  :root{
+    --bg:#14161a; --bg2:#1c1f26; --bg3:#242833; --fg:#d8dce4; --dim:#8a91a0;
+    --accent:#c8a15a; --accent2:#7aa2f7; --ok:#6fbf73; --warn:#e0a050; --bad:#e06060;
+    --border:#2e3340;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--fg); font:15px/1.8 "Microsoft YaHei","PingFang SC",sans-serif;
+       display:flex; min-height:100vh;}
+  nav{width:250px; flex:0 0 250px; background:var(--bg2); border-right:1px solid var(--border);
+      position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 14px;}
+  nav h1{font-size:16px; color:var(--accent); margin-bottom:4px;}
+  nav .sub{font-size:12px; color:var(--dim); margin-bottom:16px;}
+  nav a{display:block; color:var(--fg); text-decoration:none; font-size:13.5px;
+        padding:5px 10px; border-radius:6px; border-left:2px solid transparent;}
+  nav a:hover{background:var(--bg3);}
+  nav .grp{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin:14px 0 4px 10px;}
+  main{flex:1; max-width:960px; padding:40px 48px 120px;}
+  section{margin-bottom:56px;}
+  h2{font-size:24px; color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:16px;}
+  h3{font-size:18px; color:var(--accent2); margin:24px 0 10px;}
+  h4{font-size:15.5px; margin:18px 0 8px; color:var(--fg);}
+  p{margin:8px 0;}
+  ul,ol{margin:8px 0 8px 24px;}
+  li{margin:3px 0;}
+  code{background:var(--bg3); padding:1px 6px; border-radius:4px; font-family:Consolas,monospace; font-size:13px; color:#e8c07d;}
+  pre{background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:14px 16px;
+      overflow-x:auto; margin:10px 0; font-family:Consolas,monospace; font-size:13px; line-height:1.55;}
+  pre code{background:none; padding:0; color:var(--fg);}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th{background:var(--bg3); color:var(--accent); text-align:left;}
+  th,td{border:1px solid var(--border); padding:8px 12px; vertical-align:top;}
+  td.codecell{font-family:Consolas,monospace; font-size:13px; color:#e8c07d; white-space:pre-wrap; word-break:break-all; background:rgba(255,255,255,.02); width:44%;}
+  .card{background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin:12px 0;}
+  .note{border-left:3px solid var(--accent2); background:var(--bg2); padding:10px 16px; margin:12px 0; border-radius:0 8px 8px 0;}
+  .warn{border-left:3px solid var(--warn);}
+  .ok{border-left:3px solid var(--ok);}
+  .big{font-size:17px; color:var(--accent);}
+  a{color:var(--accent2);}
+  .meta{color:var(--dim); font-size:12.5px;}
+  @media (max-width:900px){ nav{display:none;} main{padding:24px;} }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <h1>开发者笔记 02</h1>
+  <div class="sub">代码精读<br>把我们写的每一行<br>讲给完全不懂的你</div>
+  <a href="index.html">← 返回主文档</a>
+  <a href="gas-foundation.html">笔记 01 · GAS 地基</a>
+  <a href="troubleshooting.html">故障速查手册</a>
+  <div class="grp">零基础热身</div>
+  <a href="#lesson0">第 0 课 · 十个概念</a>
+  <div class="grp">逐行精读</div>
+  <a href="#lesson1">第 1 课 · 属性表图纸(.h)</a>
+  <a href="#lesson2">第 2 课 · 属性表施工(.cpp)</a>
+  <a href="#lesson3">第 3 课 · 角色图纸(.h)</a>
+  <a href="#lesson4">第 4 课 · 角色施工(.cpp)</a>
+  <div class="grp">串起来</div>
+  <a href="#lesson5">第 5 课 · 它们何时被执行</a>
+  <a href="#lesson6">第 6 课 · 脚手架文件</a>
+</nav>
+
+<main>
+
+<!-- ==================== 开篇 ==================== -->
+<section>
+  <h2>这份文档怎么读</h2>
+  <p>我们的工程里现在有四份手写的代码文件,加起来不到 200 行。这份笔记把它们<strong>一行一行</strong>摆出来,左边是代码原文,右边是大白话翻译。</p>
+  <p>读的时候<strong>不需要背任何东西</strong>。看到眼熟就行。这份文档的使命是:三个月后你回来看自己的工程,随便指一行,都能想起"哦,这行是干嘛的"。</p>
+  <div class="note ok"><strong>阅读顺序</strong>:先读第 0 课(十个概念,都是生活比喻),然后第 1~4 课慢慢看。遇到看不懂的词,先回到第 0 课查。</div>
+</section>
+
+<!-- ==================== 第 0 课 ==================== -->
+<section id="lesson0">
+  <h2>第 0 课 · 看懂代码需要的十个概念</h2>
+  <p>全部用生活比喻,没有一句术语。</p>
+
+  <h3>1. 代码就是一张"指令清单"</h3>
+  <p>电脑是个极其死板、极其勤快的员工。代码就是你写给它的清单,<strong>从上往下,一条一条执行</strong>。它绝不会自己动脑筋,你写什么它做什么。</p>
+
+  <h3>2. <code>//</code> 后面的话是给人看的,电脑直接无视</h3>
+  <p>两个斜杠开头的叫"注释"。就像装修图纸上用铅笔写的备注——施工队(电脑)不看,只给你自己留的提示。我们的代码里写了很多注释,就是为了你回头看。</p>
+
+  <h3>3. <code>#include</code> = "把那份文件的内容抄到这里来"</h3>
+  <p>写代码经常要用到别人写好的东西。<code>#include "某某.h"</code> 的意思就是:把"某某"那份文件的全部内容,原样抄写到这一行来。类似写作文时"此处引用《某某文件》全文"。</p>
+
+  <h3>4. 代码总是成对出现:.h 是说明书,.cpp 是施工队</h3>
+  <p>我们的每个类都有两个文件:</p>
+  <ul>
+    <li><strong>.h 文件(头文件)</strong>:一份<strong>说明书</strong>,写清楚"这个东西叫什么、由哪些零件组成、会做哪些动作"。只描述,不干活。</li>
+    <li><strong>.cpp 文件</strong>:<strong>施工队</strong>,把说明书里承诺的每个动作,真正一步一步写出来。</li>
+  </ul>
+  <p>为什么要分开?就像买房时你先看户型图(.h)决定买不买,不用关心墙怎么砌(.cpp)。别人用你的代码时只看 .h 就够了。</p>
+
+  <h3>5. "类"是图纸,"对象"是按图纸造出来的实物</h3>
+  <p><strong>类(class)</strong>就是一张图纸:比如"汽车图纸"写着——有四个轮子、一个方向盘、会跑。图纸本身不能开。<br>
+  按图纸造出来的每一辆真车,叫一个<strong>对象</strong>。我们写的 <code>BaseCharacter</code> 类是"战斗角色图纸";游戏里主角、每个小兵、Boss,都是按它造出来的一个个对象,各自有各自的血量。</p>
+
+  <h3>6. "函数"是一个有名字的动作</h3>
+  <p>函数就是给一串指令起个名字,方便反复使用。比如:</p>
+  <ul>
+    <li><code>SetHealth(50)</code> —— 名字:"设置血量";括号里的 <code>50</code> 是<strong>材料</strong>(用几来设置);这行命令执行完,血量就是 50。</li>
+    <li>有的函数干完活会交回一个结果,比如 <code>GetHealth()</code> 会"汇报"当前血量是多少。括号里空着,意思是"不需要材料"。</li>
+  </ul>
+
+  <h3>7. "变量"是一个贴了标签的盒子</h3>
+  <p>变量就是盒子,标签上写名字,里面装东西。比如 <code>Health</code> 这个盒子装着当前血量这个数字。数字会变(被打就减少),但盒子的名字不变。</p>
+
+  <h3>8. "宏"是一条"查找替换"规则</h3>
+  <p>看到 <code>#define</code> 开头的,那是宏。它的意思是:"以后凡是看到 A,都当作 B 处理"。和 Word 里的"查找替换"一模一样,只不过是在编译(把代码翻译成机器语言)之前自动替换。我们的代码用它偷懒:写一遍,顶四遍。</p>
+
+  <h3>9. "指针"是门牌号,不是房子本身</h3>
+  <p>看到 <code>TObjectPtr&lt;某物&gt;</code> 或者 <code>某物*</code>,那是"指针"。它不是那个东西本身,而是<strong>那个东西的门牌号</strong>——写着"它住在内存的哪个地址"。要真正找到那个东西,得按门牌号找过去(代码里用 <code>-&gt;</code> 这个箭头,读作"去……家里")。</p>
+
+  <h3>10. 虚幻引擎的"姓名牌"规矩</h3>
+  <p>UE 给所有东西起名都带个前缀字母,看到就知道它是什么身份:</p>
+  <table>
+    <tr><th>开头字母</th><th>身份</th><th>例子</th></tr>
+    <tr><td><code>U</code></td><td>普通零件(不直接出现在游戏世界里)</td><td><code>UMyAttributeSet</code> 我们的属性表</td></tr>
+    <tr><td><code>A</code></td><td>能放进游戏世界的"演员"(Actor)</td><td><code>ABaseCharacter</code> 我们的角色</td></tr>
+    <tr><td><code>F</code></td><td>轻量的小数据结构</td><td><code>FGameplayAttributeData</code> 属性数据</td></tr>
+    <tr><td><code>I</code></td><td>接口(一纸"必须遵守的约定")</td><td><code>IAbilitySystemInterface</code></td></tr>
+  </table>
+  <div class="note"><strong>顺带说三个高频英文词</strong>(代码里到处是它们):<code>Health</code> = 生命值;<code>Stamina</code> = 体力/耐力;<code>Damage</code> = 伤害。<code>Max</code> 是 maximum(最大值)的缩写,<code>MaxHealth</code> 就是"血量上限"。</div>
+</section>
+
+<!-- ==================== 第 1 课 ==================== -->
+<section id="lesson1">
+  <h2>第 1 课 · 属性表的图纸 —— MyAttributeSet.h</h2>
+  <p>这份文件回答一个问题:<strong>"角色的属性表,长什么样?"</strong>它只是说明书,不干活。文件位置:<code>Source/ProjectUnreal/MyAttributeSet.h</code></p>
+
+  <h3>第一部分:文件头(四句"抄过来")</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">#pragma once</td><td>对编译器说:"这份文件只准抄写一次"。防止别的文件抄它抄重了。几乎所有 .h 文件第一行都是它,是固定套路,不用深究。</td></tr>
+    <tr><td class="codecell">#include "CoreMinimal.h"</td><td>把 UE 的"基础工具包"抄过来。里面有最常用的基本功能(数字处理、文字处理等)。几乎每个 UE 代码文件都要它。</td></tr>
+    <tr><td class="codecell">#include "AttributeSet.h"</td><td>把"官方属性表图纸"抄过来。我们的图纸是在官方图纸基础上改装的,所以必须先拿到官方原版。</td></tr>
+    <tr><td class="codecell">#include "AbilitySystemComponent.h"</td><td>把"战斗大脑的图纸"抄过来。后面那个偷懒宏要用到它里面的东西。</td></tr>
+    <tr><td class="codecell">#include "MyAttributeSet.generated.h"</td><td>把<strong>引擎自动为我们生成</strong>的一份文件抄过来。我们从不自己写它,是 UE 在编译时偷偷生成的。<span class="meta">铁律:它必须是最后一个 #include,放错位置直接编译失败(踩坑实录见故障手册)。</span></td></tr>
+  </table>
+
+  <h3>第二部分:一条偷懒用的"查找替换"规则</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \</td><td>定义一条替换规则,名字叫"属性访问器"。括号里是两个"空位":类名、属性名——以后用的时候往里填。行尾的反斜杠 <code>\</code> 意思是"这行没写完,下一行接着算"。</td></tr>
+    <tr><td class="codecell">GAMEPLAYATTRIBUTE_PROPERTY_GETTER(...) \
+GAMEPLAYATTRIBUTE_VALUE_GETTER(...) \
+GAMEPLAYATTRIBUTE_VALUE_SETTER(...) \
+GAMEPLAYATTRIBUTE_VALUE_INITTER(...)</td><td>规则的内容:一口气生成<strong>四个小工具函数</strong>,分别负责——拿到属性本身、读数值、写数值、设初始值。<br>为什么费这劲?因为 GAS 规定:属性不能直接读写,必须通过这四个"正规窗口"办理,否则属性的"变化广播"(血条刷新靠它)就收不到。每个属性都要这四个窗口,手写到吐血,所以用宏批量生产。</td></tr>
+  </table>
+
+  <h3>第三部分:图纸正文</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">UCLASS()</td><td>对引擎喊:"注意!下面要登记一个新类了!"引擎听到后,会给这个类办户口(让蓝图能看见它、垃圾回收会管它)。</td></tr>
+    <tr><td class="codecell">class PROJECTUNREAL_API UMyAttributeSet : public UAttributeSet</td><td>正式报名:<br>· <code>class</code> = 这是一张图纸<br>· <code>UMyAttributeSet</code> = 图纸名字("我的属性表",U 前缀见第 0 课第 10 条)<br>· <code>PROJECTUNREAL_API</code> = 盖个"本工程出品、对外开放"的章,别处的代码才允许使用它<br>· <code>: public UAttributeSet</code> = 在官方图纸(UAttributeSet)的基础上改装。官方图纸里已有的功能我们全部免费继承,只加自己的新东西。</td></tr>
+    <tr><td class="codecell">GENERATED_BODY()</td><td>UE 要求的"暗桩"。引擎办户口时要往类里塞一些它自己的东西,这个标记就是告诉它"塞这里"。固定套路,照抄即可。</td></tr>
+    <tr><td class="codecell">public:</td><td>"以下内容是<strong>对外公开</strong>的"——图纸的这部分谁都可以看、可以用。(相对的是 private,我们没用到。)</td></tr>
+    <tr><td class="codecell">UMyAttributeSet();</td><td>声明一个<strong>构造函数</strong>——"出厂设置单"。每造一个属性表对象,都会先照这张单子做一遍初始化。这里只挂个牌子(声明),具体干什么去 .cpp 里写(第 2 课)。</td></tr>
+  </table>
+
+  <h3>第四部分:五个属性(图纸的核心)</h3>
+  <p>五个属性结构完全一样,讲透第一个,后面四个只是换名字:</p>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">UPROPERTY(BlueprintReadOnly, Category = "Attributes")</td><td>给下面这个变量办登记:<br>· <code>BlueprintReadOnly</code> = "蓝图可以<strong>读</strong>它,但不准改"(读和写分开授权,更安全)<br>· <code>Category = "Attributes"</code> = 在编辑器面板里归到"属性"这一组,好找</td></tr>
+    <tr><td class="codecell">FGameplayAttributeData Health;</td><td>图纸上的一个零件:<br>· 名字 <code>Health</code> = 生命值<br>· 类型 <code>FGameplayAttributeData</code> = "会广播自己变化的数字"。它不是普通数字——每当数值变化,它会自动敲锣通知所有关心它的人(比如血条 UI)。这就是 GAS 的属性必须用它的原因。</td></tr>
+    <tr><td class="codecell">ATTRIBUTE_ACCESSORS(UMyAttributeSet, Health)</td><td>动用前面那条偷懒规则:给 Health 批量造出四个窗口函数——<code>GetHealthAttribute()</code>(拿到属性本身)、<code>GetHealth()</code>(读血)、<code>SetHealth(x)</code>(写血)、<code>InitHealth(x)</code>(设出厂血量)。第 2 课你会看到它们被使用。</td></tr>
+  </table>
+  <div class="card">
+    <h4>后面四组,一模一样的套路,只是换名字:</h4>
+    <table>
+      <tr><th>属性名</th><th>中文</th><th>干什么用</th></tr>
+      <tr><td><code>MaxHealth</code></td><td>血量上限</td><td>满血是多少。回血、扣血都不能超过它</td></tr>
+      <tr><td><code>Stamina</code></td><td>当前体力</td><td>攻击、翻滚都要消耗它(第 4、5 章用)</td></tr>
+      <tr><td><code>MaxStamina</code></td><td>体力上限</td><td>同上</td></tr>
+      <tr><td><code>Damage</code></td><td>伤害(临时通道)</td><td><strong>最特殊的一个</strong>:它不是角色的状态,而是一个"快递单号"。别人打我们时,伤害数值先放在这个临时位子上,我们的代码(第 2 课)取出来扣血、然后立刻撕掉单子(清零)。它存在的唯一意义是把伤害数值从"攻击方"手里递到"受伤方"手里。</td></tr>
+    </table>
+  </div>
+
+  <h3>第五部分:两个"钩子"的预告</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">virtual void PreAttributeChange(const FGameplayAttribute&amp; Attribute, float&amp; NewValue) override;</td><td>钩子一:"<strong>任何属性马上要变化之前</strong>,先叫我一声"。<br>· <code>virtual</code> + <code>override</code> 意思是:官方图纸上本来有这个钩子(空壳),我们现在把它<strong>换成自己的版本</strong><br>· 括号里的材料:<code>Attribute</code> = 是哪个属性要变;<code>NewValue</code> = 要变成多少<br>· 我们要在里面干什么?第 2 课揭晓(剧透:把数值夹在合法范围,血不能变负数)</td></tr>
+    <tr><td class="codecell">virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData&amp; Data) override;</td><td>钩子二:"<strong>每条规则(GE)结算完之后</strong>,叫我一声"。<br>· 材料 <code>Data</code> 是一个快递包裹:里面写着谁打的、改了哪个属性、改了多少<br>· 这是全游戏<strong>最重要的一个钩子</strong>:所有伤害、回血、耗体力,最终都在这里拆包处理。第 2 课细讲。</td></tr>
+  </table>
+  <div class="note ok"><strong>第 1 课小结</strong>:这份 .h 就是一张说明书,宣布了三件事:① 我有五个属性零件(血/血上限/体力/体力上限/伤害通道);② 每个零件配了四个正规办理窗口;③ 我在两个关键时刻安了钩子(属性要变时、规则结算后)。怎么干?看下一课。</div>
+</section>
+
+<!-- ==================== 第 2 课 ==================== -->
+<section id="lesson2">
+  <h2>第 2 课 · 属性表的施工 —— MyAttributeSet.cpp</h2>
+  <p>上一课是"我承诺做什么",这一课是"我具体怎么做"。文件位置:<code>Source/ProjectUnreal/MyAttributeSet.cpp</code></p>
+
+  <h3>第一部分:文件头</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">#include "MyAttributeSet.h"</td><td>先把自己的说明书抄过来——施工队当然要知道图纸上承诺了什么。</td></tr>
+    <tr><td class="codecell">#include "GameplayEffectExtension.h"</td><td>把"快递包裹的拆包说明书"抄过来。上一课那个钩子二的材料 <code>Data</code>,它的内部构造写在这份文件里。不抄它,电脑就只知道"有个包裹"而不知道"包裹怎么拆",会报错(故障手册 P11 记的就是这个错)。</td></tr>
+  </table>
+
+  <h3>第二部分:出厂设置单(构造函数)</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">UMyAttributeSet::UMyAttributeSet()</td><td>"下面开始写 UMyAttributeSet 这张图纸的出厂设置单。"(<code>::</code> 读作"……家的",即:UMyAttributeSet 家的 UMyAttributeSet 函数。函数和图纸同名,表示它是构造函数——每个新对象诞生时自动执行一次。)</td></tr>
+    <tr><td class="codecell">InitHealth(100.f);
+InitMaxHealth(100.f);
+InitStamina(100.f);
+InitMaxStamina(100.f);</td><td>四行,调用第 1 课用宏造出来的"设初始值"窗口:<br>出生血量 = 100,血量上限 = 100,体力 = 100,体力上限 = 100。<br>(<code>100.f</code> 里的 <code>.f</code> 只是告诉电脑"这是带小数的数",写 100 也行,写 100.f 更规范。)<br><span class="meta">注意:这只是"白板上写的默认值"。真正游戏里生效的数值来自策划配的 GE(笔记 01 的 GE_InitAttributes)——要改数值永远改 GE,不改这里。</span></td></tr>
+  </table>
+
+  <h3>第三部分:钩子一 —— 数值安检门(PreAttributeChange)</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">void UMyAttributeSet::PreAttributeChange(const FGameplayAttribute&amp; Attribute, float&amp; NewValue)</td><td>"下面写 UMyAttributeSet 家的钩子一"。材料:<code>Attribute</code> = 哪个属性要变;<code>NewValue</code> = 准备变成几。(<code>&amp;</code> 的意思是"直接给你原件,不是复印件"——我们改了 NewValue,外面立刻生效,这正是安检门需要的能力。)</td></tr>
+    <tr><td class="codecell">Super::PreAttributeChange(Attribute, NewValue);</td><td>"先让官方图纸的版本也跑一遍。"(<code>Super</code> = 老爸,即官方图纸。)礼貌性动作:我们改装归改装,老爸该做的例行公事不能省。</td></tr>
+    <tr><td class="codecell">if (Attribute == GetHealthAttribute())</td><td>安检开始:"<strong>如果</strong>要变的这个属性是'生命值'……"(== 是"等于吗?"的提问;GetHealthAttribute() 就是第 1 课宏造出来的"属性本身",用来比对身份。)</td></tr>
+    <tr><td class="codecell">NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());</td><td>"那就把新数值强行夹在 0 到血量上限之间。"<code>FMath::Clamp</code> = 引擎提供的"夹子"工具:三个材料分别是(数值, 下限, 上限)。效果:血再扣不会变负数,再回不会超过满血。</td></tr>
+    <tr><td class="codecell">else if (Attribute == GetStaminaAttribute()) { … }</td><td>体力的同款安检,夹在 0 到体力上限之间。结构完全一样,不重复讲。</td></tr>
+  </table>
+
+  <h3>第四部分:钩子二 —— 拆包处理台(PostGameplayEffectExecute)⭐ 全课最重要</h3>
+  <p>先回忆一下它在游戏里的位置:<strong>每次有一条规则(GE)对角色结算完毕,这个函数就被自动叫起来一次</strong>。伤害 GE 结算完 → 叫它;回血 GE 结算完 → 叫它。所有数值变动的"最后一站"。</p>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">void UMyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData&amp; Data)</td><td>"下面写 UMyAttributeSet 家的钩子二"。材料 <code>Data</code> 就是快递包裹:本次结算的完整信息。</td></tr>
+    <tr><td class="codecell">Super::PostGameplayEffectExecute(Data);</td><td>老规矩,先让老爸的版本跑一遍。</td></tr>
+    <tr><td class="codecell">if (Data.EvaluatedData.Attribute == GetDamageAttribute())</td><td>拆包检查:"这次结算改的是不是'伤害通道'(Damage)?"——我们暂时只关心这一种包裹,其他包裹(比如初始化 GE)直接放行。<br><span class="meta">读法:<code>Data.EvaluatedData.Attribute</code> 是"包裹.里面的结算单.上面的属性名",一层一层拆开看。</span></td></tr>
+    <tr><td class="codecell">const float LocalDamage = GetDamage();</td><td>"把伤害数值从通道里读出来,记在一个小本本上。"<br>· <code>float</code> = 这个小本本装带小数的数<br>· <code>LocalDamage</code> = 小本本的名字("本次伤害",Local 表示只在本次使用)<br>· <code>const</code> = 记上就不许涂改</td></tr>
+    <tr><td class="codecell">SetDamage(0.f);</td><td>"<strong>立刻把伤害通道清零。</strong>"这行极其重要:通道是公用的,这次用完不撕单子,下次新伤害进来就会和旧单子叠在一起,伤害翻倍出错。用完即撕,铁律。</td></tr>
+    <tr><td class="codecell">if (LocalDamage &gt; 0.f)</td><td>"如果小本本上的伤害大于 0"(> 大于号,写成 &gt; 是因为网页里要转义,代码里就是 >)。防御性检查:伤害是 0 就不用费事了。</td></tr>
+    <tr><td class="codecell">SetHealth(FMath::Clamp(GetHealth() - LocalDamage, 0.f, GetMaxHealth()));</td><td>真正扣血,一行干三件事,从最里面往外读:<br>① <code>GetHealth() - LocalDamage</code>:当前血量 − 伤害 = 新血量<br>② <code>FMath::Clamp(…, 0, 上限)</code>:用夹子夹住,防止扣成负数<br>③ <code>SetHealth(…)</code>:通过正规窗口写回去(血条 UI 立刻收到广播,准备刷新)</td></tr>
+  </table>
+  <div class="note"><strong>将来这里会加什么</strong>(第 4、5 章):查"无敌贴纸"(翻滚无敌帧)、查防御减伤、判断血量归零播死亡动画。全部都在这个 if 里扩展——这就是为什么 GAS 说"数值逻辑集中化":不管多少种伤害来源,最终都汇聚到这一个处理台。</div>
+  <div class="note ok"><strong>第 2 课小结</strong>:出厂全设 100;属性变化前要过安检门(不能负、不能超);规则结算后要拆包裹(是伤害就:读出来 → 撕单子 → 扣血)。</div>
+</section>
+
+<!-- ==================== 第 3 课 ==================== -->
+<section id="lesson3">
+  <h2>第 3 课 · 角色的图纸 —— BaseCharacter.h</h2>
+  <p>属性表只有数字,不会走路不会挨打。这份文件定义的是"一个<strong>会战斗的角色</strong>长什么样":它有身体(来自官方角色图纸)、有战斗大脑、有属性表。文件位置:<code>Source/ProjectUnreal/BaseCharacter.h</code></p>
+
+  <h3>第一部分:文件头与"剧透名单"</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">#include "GameFramework/Character.h"</td><td>把官方"角色图纸"抄过来。这张官方图纸非常强大:会走路、跳跃、碰撞、被玩家操控——我们全部免费继承。</td></tr>
+    <tr><td class="codecell">#include "AbilitySystemInterface.h"</td><td>把"战斗系统接口"抄过来。接口是什么?下一行就讲。</td></tr>
+    <tr><td class="codecell">class UAbilitySystemComponent;
+class UMyAttributeSet;
+class UGameplayEffect;</td><td>三行"剧透名单",学名叫<strong>前向声明</strong>。意思是:"下面会用到这三个名字,它们具体长什么样暂时不细说,你先知道有这三号东西就行。"<br>为什么不 #include 抄全文?因为 .h 会被很多文件抄写,抄得越轻,编译越快。等真正要用了,在 .cpp 里再抄全文(下一课会看到)。</td></tr>
+  </table>
+
+  <h3>第二部分:图纸正文 —— 这次有两个"爸爸"</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">class PROJECTUNREAL_API ABaseCharacter : public ACharacter, public IAbilitySystemInterface</td><td>报名:<br>· <code>ABaseCharacter</code> = 名字("基础角色",A 前缀表示能放进游戏世界,见第 0 课第 10 条)<br>· <code>: public ACharacter</code> = 第一个爸爸:官方角色图纸(送你会跑会跳的身体)<br>· <code>, public IAbilitySystemInterface</code> = 第二个爸爸:一纸<strong>约定</strong>。约定内容只有一条:"你必须提供一个窗口,让别人能找到你的战斗大脑。"签了这份约定,GAS 系统才承认你是"能战斗的角色"。</td></tr>
+    <tr><td class="codecell">virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;</td><td>这就是兑现那份约定的窗口:"<strong>来,这是我的战斗大脑的门牌号。</strong>"<br>· 返回值类型 <code>UAbilitySystemComponent*</code> = 战斗大脑的门牌号(指针,见第 0 课第 9 条)<br>· 名字超长?<code>Get Ability System Component</code> = "获取·战斗大脑·组件",UE 的风格就是把话说全<br>· <code>const</code> = 保证"只汇报,不偷改"</td></tr>
+    <tr><td class="codecell">virtual void BeginPlay() override;</td><td>声明一个引擎规定的固定节目:"<strong>这个角色进入游戏世界的那一刻</strong>,自动执行一次"。我们要在这个时刻给自己打"出生初始化"的规则(GE)。覆盖官方版本,内容去 .cpp 写。</td></tr>
+  </table>
+
+  <h3>第三部分:三个零件</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+TObjectPtr&lt;UAbilitySystemComponent&gt; AbilitySystemComponent;</td><td>零件一:<strong>战斗大脑</strong>本身。<br>· <code>VisibleAnywhere</code> = 在编辑器面板里能看到它<br>· <code>TObjectPtr&lt;...&gt;</code> = 装着门牌号的盒子(第 0 课第 9 条),门牌指向战斗大脑<br>这个角色拥有的技能、身上的 Buff、属性表,全归这个大脑管。</td></tr>
+    <tr><td class="codecell">UPROPERTY()
+TObjectPtr&lt;const UMyAttributeSet&gt; AttributeSet;</td><td>零件二:<strong>属性表</strong>——就是第 1、2 课那张图纸造出来的实例,装着这个角色的血/体力数值。<br>· <code>const</code> = 只准通过它的正规窗口(第 1 课的四个函数)改数值,不准直接把表格换掉</td></tr>
+    <tr><td class="codecell">UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS")
+TSubclassOf&lt;UGameplayEffect&gt; InitAttributesEffect;</td><td>零件三:<strong>出生时要打的那条规则</strong>(GE_InitAttributes 的位子)。<br>· <code>EditDefaultsOnly</code> = 允许在编辑器的蓝图里填这个空(策划的活)<br>· <code>TSubclassOf&lt;UGameplayEffect&gt;</code> = 这个空里只能放"规则(GE)这一类的东西",放别的(比如一张贴图)编辑器会拒绝<br>注意:这里只留了<strong>空位</strong>,具体放哪条规则,是在蓝图 BP_BaseCharacter 里填的(编辑器四步配置的第 3 步)。</td></tr>
+  </table>
+  <div class="note ok"><strong>第 3 课小结</strong>:角色 = 官方送的身体 + 战斗大脑 + 属性表 + 一个"出生时打什么规则"的空位。外加两个承诺:能交出大脑的门牌号;出生时执行一次初始化。</div>
+</section>
+
+<!-- ==================== 第 4 课 ==================== -->
+<section id="lesson4">
+  <h2>第 4 课 · 角色的施工 —— BaseCharacter.cpp</h2>
+
+  <h3>第一部分:文件头</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">#include "BaseCharacter.h"</td><td>抄自己的说明书。</td></tr>
+    <tr><td class="codecell">#include "AbilitySystemComponent.h"
+#include "MyAttributeSet.h"</td><td>上一课"剧透名单"里的前两位,现在真正要用它们了,抄全文。(第三位 UGameplayEffect 在 .h 里已经够用,这里不再抄。)</td></tr>
+  </table>
+
+  <h3>第二部分:出厂设置单(构造函数)</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">ABaseCharacter::ABaseCharacter()</td><td>"下面写 ABaseCharacter 家的出厂设置单。"每个角色诞生(放进关卡、游戏开始)时执行一次。</td></tr>
+    <tr><td class="codecell">PrimaryActorTick.bCanEverTick = false;</td><td>"关掉每帧心跳。"默认情况下引擎每过一帧(一秒几十次)都会叫角色一次("有新情况吗?"),叫一次就要花一点性能。我们的角色暂时不需要每帧被打扰,关掉,省性能。<span class="meta">(以后需要时随时可以打开。)</span></td></tr>
+    <tr><td class="codecell">AbilitySystemComponent = CreateDefaultSubobject&lt;UAbilitySystemComponent&gt;(TEXT("AbilitySystemComponent"));</td><td>"<strong>给这个角色造一个战斗大脑,装进身体。</strong>"<br>· <code>CreateDefaultSubobject</code> = "在出厂流水线上预装一个零件"(零件类型写在&lt;&gt;里,零件的实例名写在括号里)<br>· <code>TEXT("...")</code> 只是给引擎看的零件标签<br>· 左边把它存进门牌盒(第 3 课零件一),以后随时能按门牌找到大脑</td></tr>
+    <tr><td class="codecell">AttributeSet = CreateDefaultSubobject&lt;UMyAttributeSet&gt;(TEXT("AttributeSet"));</td><td>"再预装一个零件:属性表。"流水线上同一个动作,装的是第 1、2 课那张图纸造出的表——所以这个角色一出生就有血有体力,还自带安检门和拆包台。</td></tr>
+  </table>
+
+  <h3>第三部分:兑现约定</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">UAbilitySystemComponent* ABaseCharacter::GetAbilitySystemComponent() const</td><td>"下面写 ABaseCharacter 家的'交出门牌号'窗口。"</td></tr>
+    <tr><td class="codecell">return AbilitySystemComponent;</td><td>"把大脑的门牌号递出去。"(<code>return</code> = 交出结果,走人。)就这么简单——但必须有,GAS 全靠它找到每个角色的战斗大脑。</td></tr>
+  </table>
+
+  <h3>第四部分:出生那一刻(BeginPlay)⭐</h3>
+  <table>
+    <tr><th>代码原文</th><th>大白话翻译</th></tr>
+    <tr><td class="codecell">void ABaseCharacter::BeginPlay()</td><td>"下面写'进入游戏世界那一刻'要干的事。"</td></tr>
+    <tr><td class="codecell">Super::BeginPlay();</td><td>先让爸爸(官方角色)的版本跑——人家有一堆自己的开场准备要做,不能省。</td></tr>
+    <tr><td class="codecell">if (AbilitySystemComponent &amp;&amp; InitAttributesEffect)</td><td>开场前先检查两件事,缺一不可:<br>① 战斗大脑在不在?(防万一)<br>② "出生规则"那个空位填了没有?(策划在蓝图里填了 GE_InitAttributes 才有)<br><code>&amp;&amp;</code> = "并且",两个都成立才继续。</td></tr>
+    <tr><td class="codecell">FGameplayEffectContextHandle Context = AbilitySystemComponent-&gt;MakeEffectContext();</td><td>打规则第一步:<strong>造一个"操作记录单"</strong>。"大脑,给我开一张新单子。"(<code>-&gt;</code> 还记得吗:"去……家里"——去大脑家里,叫它开单。)这张单子用来记录:这条规则是谁发起的、打在谁身上。</td></tr>
+    <tr><td class="codecell">Context.AddSourceObject(this);</td><td>"单子上登记发起人:<strong>我自己</strong>。"(<code>this</code> = 我,这个角色本人。)以后追查"这条规则是谁打的",有据可查。</td></tr>
+    <tr><td class="codecell">const FGameplayEffectSpecHandle Spec = AbilitySystemComponent-&gt;MakeOutgoingSpec(InitAttributesEffect, 1.f, Context);</td><td>打规则第二步:<strong>按规则配出一份"执行单"</strong>。"大脑,照着'出生规则'(GE_InitAttributes)配一份执行单:强度等级 1,关联刚才那张记录单。"<br>类比:规则(GE)是药方,执行单(Spec)是"按药方抓好的这副药"。</td></tr>
+    <tr><td class="codecell">if (Spec.IsValid())</td><td>"检查药抓好了没有。"(药方写错、药材不够,都可能抓不出来,先验货。)</td></tr>
+    <tr><td class="codecell">AbilitySystemComponent-&gt;ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());</td><td>打规则第三步:<strong>"去大脑家里,把这副药给我自己服下。"</strong>——规则正式生效:血量、体力被设成 GE 里配的数值(100)。<br><span class="meta"> Apply Gameplay Effect Spec To Self = 把·规则·执行单·应用到·自己。UE 函数名就是这句话的英文原文。结尾的 <code>*Spec.Data.Get()</code> 是"从门牌号取出执行单本体"的固定写法,眼熟即可。</span></td></tr>
+  </table>
+  <div class="note"><strong>这三步(开记录单 → 配执行单 → 服下)是"手动打一条规则"的标准流程</strong>,以后写代码打任何 GE 都长这样。不过大多数时候我们在蓝图里打 GE,一个节点就搞定,这段 C++ 只在角色出生时跑这一次。</div>
+  <div class="note ok"><strong>第 4 课小结</strong>:出生时预装大脑和属性表;有人来要门牌号就交;进入世界那一刻,检查完毕后用三步标准流程把"出生规则"服下——角色满状态登场。</div>
+</section>
+
+<!-- ==================== 第 5 课 ==================== -->
+<section id="lesson5">
+  <h2>第 5 课 · 串起来:这些代码在游戏里什么时候被执行</h2>
+  <p>代码不是一直跑的,是被一个个"时刻"触发的。完整时间线:</p>
+  <pre>【双击打开工程】
+  编辑器加载我们的 dll,四份代码处于"待命"状态,一行都没执行
+
+【把 BP_BaseCharacter 拖进关卡,按 PIE 开始游戏】
+  ① 角色诞生 → 执行【构造函数】(第 4 课第二部分)
+       关心跳 → 预装战斗大脑 → 预装属性表
+       (属性表自己的构造函数也跑了一遍:白板默认全 100,第 2 课第二部分)
+  ② 角色进入世界 → 执行【BeginPlay】(第 4 课第四部分)
+       检查 → 开记录单 → 配执行单 → 服下 GE_InitAttributes
+       属性被改成 GE 里配的值
+       改的过程中,每个属性都过了一遍【安检门】(第 2 课第三部分)
+
+【将来:怪物一刀砍在主角身上(第 4 章实现)】
+  ③ 攻击技能对主角打一条 GE_Damage(伤害 50)
+  ④ 伤害数值先落在"伤害通道"上
+  ⑤ 结算完毕 → 自动触发【拆包台】(第 2 课第四部分)
+       认出是伤害包裹 → 读出 50 → 撕单子 → 100 − 50 = 50 写回血量
+  ⑥ 血量变化广播 → 血条 UI 刷新(第 8 章)</pre>
+  <div class="note ok"><strong>你现在应该能理解这句话了</strong>:我们写的代码,本质是往引擎的几个"固定时刻"(诞生、入场、属性要变、规则结算完)里,挂上了自己定制的行为。引擎负责调度,我们负责在钩子里答题。这就是游戏开发的常态。</div>
+</section>
+
+<!-- ==================== 第 6 课 ==================== -->
+<section id="lesson6">
+  <h2>第 6 课 · 脚手架文件(了解即可,不用背)</h2>
+  <p>还有几个第 1 章生成的文件,属于"工程基建",知道它们是干嘛的就够了:</p>
+  <table>
+    <tr><th>文件</th><th>作用(一句话)</th></tr>
+    <tr><td class="codecell">ProjectUnreal.Build.cs</td><td>"购物清单":告诉编译器我们的代码需要哪些引擎零件库(GAS 三件套、输入系统等就登记在这里)。<strong>以后加新功能报"找不到符号"时,先想到来这里补登记。</strong></td></tr>
+    <tr><td class="codecell">ProjectUnreal.Target.cs / ProjectUnrealEditor.Target.cs</td><td>"出厂配置单":告诉编译器要造的是游戏本体还是编辑器,以及用什么编译规范(V7 那次踩坑就在这两个文件里)。</td></tr>
+    <tr><td class="codecell">ProjectUnreal.h / .cpp</td><td>"门牌登记处":只有几行,向引擎登记"我们这个工程是一个模块"。写完就没动过,也不用动。</td></tr>
+  </table>
+  <div class="note warn"><strong>毕业自测</strong>(不看文档能答上三条就算消化了):<br>1. 为什么属性要用四个窗口函数读写,而不是直接赋值?<br>2. 伤害为什么不直接扣血,要先放"伤害通道"再过一手?<br>3. BeginPlay 里的三步流程分别是什么?<br>4. GE_InitAttributes 的数值配在哪里、为什么改数值不改 C++?</div>
+</section>
+
+</main>
+</body>
+</html>
