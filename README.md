@@ -8,6 +8,7 @@
 - [开发者笔记 01 · GAS 地基](docs/gas-foundation.html) —— 概念 + 完整代码 + 编辑器点击级步骤
 - [开发者笔记 02 · 代码精读](docs/code-walkthrough.html) —— 每行代码的中文逐行说明(零基础友好)
 - [故障速查手册(错题本)](docs/troubleshooting.html) —— P1~P14,按报错关键词索引,症状→快速解法
+- [AI 交接备忘录](docs/AI-MEMORY.md) —— 给 AI 助手的关键上下文备份(新会话接手必读)
 - [项目主文档](docs/index.html) —— 计划表、各章节执行记录、资产清单
 
 > 提示:docs 下是 HTML 文档,克隆到本地后用浏览器打开体验最佳;GitHub 网页上可直接读源码。
