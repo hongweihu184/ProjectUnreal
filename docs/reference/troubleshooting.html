@@ -79,6 +79,7 @@
   <a href="#p14">P14 游戏模块不加载</a>
   <a href="#p15">P15 WP 地图脚本搬家失败</a>
   <a href="#p16">P16 IMC 修改器脚本写不进</a>
+  <a href="#p17">P17 弹簧臂相对旋转无效</a>
 </nav>
 
 <main>
@@ -344,6 +345,26 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
   <ul>
     <li>"set_editor_property 没报错" ≠ 写进去了——对返回值(而非对象本体)的写操作要验证落盘(二进制搜字符串 / 编辑器里看一眼)</li>
     <li>中文界面里 Swizzle 译作"拌和输入轴值"(误译,实为轴值交换),Negate 译作"取反/否定"</li>
+  </ul>
+</section>
+
+<!-- ============ P17 ============ -->
+<section id="p17">
+  <h2>P17 · 弹簧臂"相对旋转"设了不生效 <span class="fix">已定性</span></h2>
+  <p class="sym">症状:想给相机加默认俯角,把弹簧臂(CameraBoom)的相对旋转 Pitch 设为 -15,PIE 后毫无变化</p>
+  <h4>原因</h4>
+  <p>弹簧臂勾选 <code>bUsePawnControlRotation</code>(使用 Pawn 控制旋转)后,目标旋转会被 Pawn 的视角旋转(PawnViewRotation)<strong>整体替换</strong>,组件自身的相对旋转被完全忽略。源码实锤:<code>SpringArmComponent.cpp</code> GetTargetRotation()(5.8 第 56~66 行)。继承开关(bInheritPitch/Yaw/Roll)的用途是"某个轴<strong>不</strong>继承时,退回用相对旋转",不是叠加。</p>
+  <h4>解法(按需求三选一)</h4>
+  <table>
+    <tr><th>需求</th><th>做法</th></tr>
+    <tr><td>默认俯角 + 鼠标自由环绕(魂系)</td><td>改<strong>控制器</strong>初始俯仰:BeginPlay 里 <code>SetControlRotation(Pitch=-15)</code>。本工程做法:C++ 读 UPROPERTY <code>DefaultCameraPitch</code>(-15),BP 细节面板可调</td></tr>
+    <tr><td>只想要视角下倾,不动轨道</td><td>俯角设在<strong>相机组件</strong>(FollowCamera)的相对旋转上——它是臂末端乘客,不受 pawn 控制旋转影响(官方格斗模板思路)</td></tr>
+    <tr><td>固定机位</td><td>关掉 bUsePawnControlRotation,相对旋转即生效</td></tr>
+  </table>
+  <h4>教训</h4>
+  <ul>
+    <li>"面板上摆着的参数"不等于"当前配置下有效"——弹簧臂在 pawn 控制旋转模式下,相对旋转就是个摆设</li>
+    <li>相机角度有三个可写的层:控制器(轨道)、弹簧臂(仅不继承时)、相机组件(视角)。写之前先想清楚要改哪一层</li>
   </ul>
 </section>
 
