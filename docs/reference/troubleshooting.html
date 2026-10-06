@@ -78,6 +78,7 @@
   <a href="#p13">P13 引擎首次启动慢</a>
   <a href="#p14">P14 游戏模块不加载</a>
   <a href="#p15">P15 WP 地图脚本搬家失败</a>
+  <a href="#p16">P16 IMC 修改器脚本写不进</a>
 </nav>
 
 <main>
@@ -99,6 +100,7 @@
     <tr><td><a href="#p11">"error C2027: 使用了未定义类型 FGameplayEffectModCallbackData"</a></td><td>cpp 里补 #include "GameplayEffectExtension.h"</td></tr>
     <tr><td><a href="#p12">git push "Connection was reset"</a></td><td>给 git 配本机代理(见 P12)</td></tr>
     <tr><td><a href="#p14">GE 修饰符里找不到自定义属性 / 蓝图搜不到自己的 C++ 类</a></td><td>.uproject 的 Modules 被清空 → 补回模块注册,重启编辑器</td></tr>
+    <tr><td><a href="#p16">按 W 角色向右走(轴向错误);IMC 修改器脚本设置不生效</a></td><td>修改器只能编辑器里手动加(map_key 返回副本,写不回);WASD 配法见 P16</td></tr>
   </table>
 </section>
 
@@ -327,6 +329,21 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
     <li>Python 自动化适用于"普通资产"(输入资产、混合空间等),<strong>地图/关卡类资产的操作留给 GUI</strong></li>
     <li>脚本连续两次同类失败就该停手换 GUI,别在无头模式里硬磕(本次连试 4 次,均属无谓消耗)</li>
     <li>试错前先想"这个操作在 GUI 里要几秒"——15 秒能点完的,不值得写脚本</li>
+  </ul>
+</section>
+
+<!-- ============ P16 ============ -->
+<section id="p16">
+  <h2>P16 · 按 W 角色向右走 / IMC 修改器脚本设置不生效 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:按 W 角色右转;Python 脚本里 map_key 后 set_editor_property("modifiers") 日志成功,但资产里没有修改器(二进制里搜不到 InputModifierSwizzleAxis 字符串)</p>
+  <h4>原因</h4>
+  <p>两个叠加:① Enhanced Input 的开关量输入默认落在 <strong>X 轴</strong>,W/S 没有 Swizzle 时按下等于"向右";② <code>map_key</code> 返回的 FEnhancedActionKeyMapping 在 Python/蓝图里都是<strong>副本</strong>,对副本写 modifiers 不会回传到 IMC 的真实数组——且全程无报错,属于静默失败。引擎没有提供任何"原地编辑映射修改器"的 API。</p>
+  <h4>解法</h4>
+  <p><strong>IMC 的修改器只能在编辑器里手动加</strong>(打开 IMC → 每行映射 → 修改器下拉 → +)。WASD 标准配法与原理见<a href="glossary.html">术语对照表</a>的"Enhanced Input:WASD 修改器原理"一节。</p>
+  <h4>教训</h4>
+  <ul>
+    <li>"set_editor_property 没报错" ≠ 写进去了——对返回值(而非对象本体)的写操作要验证落盘(二进制搜字符串 / 编辑器里看一眼)</li>
+    <li>中文界面里 Swizzle 译作"拌和输入轴值"(误译,实为轴值交换),Negate 译作"取反/否定"</li>
   </ul>
 </section>
 

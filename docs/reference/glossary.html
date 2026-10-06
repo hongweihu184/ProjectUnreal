@@ -76,7 +76,21 @@
     <tr><td>Ability System Component(ASC)</td><td>能力系统组件</td><td>角色细节面板里可见</td></tr>
     <tr><td>Gameplay Tag</td><td>游戏标签(GameplayTags)</td><td>Project Settings → GameplayTags 页录入</td></tr>
     <tr><td>StateTree</td><td>StateTree(未译)</td><td>添加菜单 → Gameplay 分类下,第 6 章 AI 用</td></tr>
+    <tr><td><strong>Swizzle Input Axis Values</strong></td><td><strong>拌和输入轴值(官方误译)</strong></td><td>⭐ 实为"轴值交换":把 X 轴的值换到 Y 轴。与"混合(Blend)"无关!Enhanced Input 映射修改器,选 YXZ 档</td></tr>
+    <tr><td>Negate</td><td>取反 / 否定</td><td>输入值 × −1,Enhanced Input 映射修改器</td></tr>
+    <tr><td>Modifiers(输入映射里)</td><td>修改器</td><td>IMC 每行映射上的变换规则(Swizzle/Negate 等),和 GE 的"修饰符"同名不同物</td></tr>
   </table>
+
+  <h3>Enhanced Input:WASD 修改器原理(第 3 章实操结论)</h3>
+  <p>键盘按键是开关量(按下=+1),进入二维值(Axis2D)时<strong>默认落在 X 轴</strong>。我们的约定:Y=前后,X=左右。因此:</p>
+  <table>
+    <tr><th>按键</th><th>修改器</th><th>变换过程</th><th>结果</th></tr>
+    <tr><td>D(右)</td><td>无</td><td>(+1,0) 原样</td><td>+X</td></tr>
+    <tr><td>A(左)</td><td>取反</td><td>(+1,0) × −1</td><td>−X</td></tr>
+    <tr><td>W(前)</td><td>拌和输入轴值(YXZ)</td><td>X 的值换到 Y</td><td>+Y</td></tr>
+    <tr><td>S(后)</td><td>拌和 + 取反</td><td>先换到 Y 再 × −1</td><td>−Y</td></tr>
+  </table>
+  <p class="meta">记忆:原始值天生"向右";A 取反,W/S 先拌和换轴,S 再取反。</p>
 </section>
 
 <!-- ==================== 蓝图编辑器 ==================== -->
