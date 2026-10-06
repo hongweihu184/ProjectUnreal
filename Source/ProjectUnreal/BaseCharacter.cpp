@@ -8,6 +8,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
+#include "Abilities/GameplayAbility.h"
+#include "GameplayTagContainer.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -78,6 +80,17 @@ void ABaseCharacter::BeginPlay()
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 		}
 	}
+
+	if (AbilitySystemComponent)
+	{
+		for (const TSubclassOf<UGameplayAbility>& AbilityClass : StartupAbilities)
+		{
+			if (AbilityClass)
+			{
+				AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityClass, 1, -1, this));
+			}
+		}
+	}
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -108,6 +121,18 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 			EnhancedInput->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 			EnhancedInput->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		}
+		if (AttackAction)
+		{
+			EnhancedInput->BindAction(AttackAction, ETriggerEvent::Started, this, &ABaseCharacter::OnAttackInput);
+		}
+	}
+}
+
+void ABaseCharacter::OnAttackInput()
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag(FName("Ability.Attack.Light"))));
 	}
 }
 

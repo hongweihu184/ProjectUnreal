@@ -9,6 +9,7 @@
 class UAbilitySystemComponent;
 class UMyAttributeSet;
 class UGameplayEffect;
+class UGameplayAbility;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -58,6 +59,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> AttackAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS")
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float DefaultCameraPitch = -15.f;
+
+	void OnAttackInput();
 };
