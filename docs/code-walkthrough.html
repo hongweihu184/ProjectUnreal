@@ -247,6 +247,40 @@ TSubclassOf&lt;UGameplayEffect&gt; InitAttributesEffect;</td><td>成员:出生�
   <div class="note ok"><strong>自测</strong>:① 属性为什么不能直接赋值?② Damage 为什么要用临时通道?③ 施加 GE 的三步是什么?④ 改出生血量应该改哪里?</div>
 </section>
 
+<!-- ==================== 附录:宏的完全展开 ==================== -->
+<section id="macro">
+  <h2>附录 · ATTRIBUTE_ACCESSORS 的完全展开(源码级)</h2>
+  <p>关键零件是宏里的 <code>##</code> 符号:<strong>文字拼接</strong>。例如 <code>Get##Health</code> 会被粘成 <code>GetHealth</code>。四个引擎宏定义在引擎文件 <code>Engine/Plugins/Runtime/GameplayAbilities/Source/GameplayAbilities/Public/AttributeSet.h</code> 第 428~456 行,可自行核对。</p>
+  <p><code>ATTRIBUTE_ACCESSORS(UMyAttributeSet, Health)</code> 经过两层替换 + 拼接后,等价于手写了四个函数:</p>
+  <table>
+    <tr><th>生成的函数(真实展开,略有删节)</th><th>说明</th></tr>
+    <tr><td class="codecell">static FGameplayAttribute GetHealthAttribute()
+{
+	static FProperty* Prop = FindFieldChecked&lt;FProperty&gt;(
+		UMyAttributeSet::StaticClass(), "Health");
+	return Prop;
+}</td><td>属性的"身份证"。通过反射系统按字符串名字 "Health" 查到该属性的注册信息。用于"这次变化的是哪个属性"的比对。</td></tr>
+    <tr><td class="codecell">inline float GetHealth() const
+{
+	return Health.GetCurrentValue();
+}</td><td>读数值:返回 Health 变量的当前值。</td></tr>
+    <tr><td class="codecell">inline void SetHealth(float NewVal)
+{
+	UAbilitySystemComponent* AbilityComp = GetOwningAbilitySystemComponent();
+	if (ensure(AbilityComp))
+	{
+		AbilityComp-&gt;SetNumericAttributeBase(GetHealthAttribute(), NewVal);
+	}
+}</td><td>写数值:不直接写变量,而是走战斗大脑。<strong>属性变化的通知、钳制都在这里触发——这就是禁止直接赋值的原因。</strong></td></tr>
+    <tr><td class="codecell">inline void InitHealth(float NewVal)
+{
+	Health.SetBaseValue(NewVal);
+	Health.SetCurrentValue(NewVal);
+}</td><td>设初始值:直接写变量(对象刚创建时还没有大脑可用)。注意有两个值——BaseValue(基础裸值)和 CurrentValue(经 Buff 修正后的当前值),这正是属性"不是裸 float"的原因。</td></tr>
+  </table>
+  <div class="note">替换过程回顾:我们的宏先把两个空位代入(<code>ClassName→UMyAttributeSet, PropertyName→Health</code>),得到四个引擎宏;引擎宏再展开为上面的函数,其中 <code>##</code> 把 <code>Get</code> 与属性名粘成函数名。每个属性一行宏,省去手写 4 个函数。</div>
+</section>
+
 </main>
 </body>
 </html>
