@@ -77,6 +77,7 @@
   <a href="#p12">P12 git push 连接重置</a>
   <a href="#p13">P13 引擎首次启动慢</a>
   <a href="#p14">P14 游戏模块不加载</a>
+  <a href="#p15">P15 WP 地图脚本搬家失败</a>
 </nav>
 
 <main>
@@ -310,6 +311,22 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
     <li><strong>"编辑器能打开" ≠ "模块已加载"</strong>。涉及 C++ 类的功能(自定义属性、蓝图父类)突然消失时,第一反应查 .uproject 的 Modules 数组</li>
     <li>手动编辑过 .uproject 后,留意编辑器再次重写它的时机(开关插件、改项目设置),重要字段要定期检查 git diff</li>
     <li>此坑 2026-10-07 实录:GE 属性失踪 → 模块未加载 → Modules 被清空,三级倒查才定位</li>
+  </ul>
+</section>
+
+<!-- ============ P15 ============ -->
+<section id="p15">
+  <h2>P15 · World Partition 地图无法用脚本/无头模式搬家 <span class="fix">已定性</span></h2>
+  <p class="sym">症状:用 Python(rename_asset / AssetRenameData)或裸文件移动 World Partition 地图,改名返回 False 或搬完外部 Actor 全丢</p>
+  <h4>原因</h4>
+  <p>WP 地图的 Actor 分散在 <code>__ExternalActors__/&lt;地图名&gt;/</code>、<code>__ExternalObjects__/</code> 下一一对应的外部包里,且这些包内部按路径引用地图。挪动地图需要联动迁移这些包并修复双向引用——这套管线只有编辑器 GUI(内容浏览器拖拽)完整驱动;无头 Python 的 rename 系列 API 对 World 资产静默失败(返回 False,无报错)。裸移文件则会留下断链。</p>
+  <h4>解法</h4>
+  <p><strong>在编辑器内容浏览器里拖拽移动</strong>(右键 → 移动到),编辑器会自动迁移外部包并修引用。涉及"启动默认图"的,搬完同步改 <code>Config/DefaultEngine.ini</code> 的 <code>GameDefaultMap</code> / <code>EditorStartupMap</code>。</p>
+  <h4>教训</h4>
+  <ul>
+    <li>Python 自动化适用于"普通资产"(输入资产、混合空间等),<strong>地图/关卡类资产的操作留给 GUI</strong></li>
+    <li>脚本连续两次同类失败就该停手换 GUI,别在无头模式里硬磕(本次连试 4 次,均属无谓消耗)</li>
+    <li>试错前先想"这个操作在 GUI 里要几秒"——15 秒能点完的,不值得写脚本</li>
   </ul>
 </section>
 
