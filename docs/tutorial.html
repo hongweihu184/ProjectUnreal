@@ -62,6 +62,8 @@
   <a href="#step2">第 2 步 · GAS 地基(C++)</a>
   <a href="#step3">第 3 步 · 编辑器配置</a>
   <a href="#step4">第 4 步 · 验收</a>
+  <a href="#step5">第 5 步 · 主角接入</a>
+  <a href="#step6">第 6 步 · 三连击(进行中)</a>
   <div class="grp">之后</div>
   <a href="#next">后续路线</a>
   <a href="#map">文档地图</a>
@@ -181,6 +183,31 @@ GameplayTagList=(Tag="Event",DevComment="")</pre>
   <p>此刻你拥有的东西,比看上去多得多:伤害管线(GE → 通道 → 结算回调)已经闭环,UI 刷新靠属性变化通知天然支持,体力消耗/回血/Buff 都只是"再加一条 GE"的事。这就是选 GAS 而不是 ApplyDamage 的理由。</p>
 </section>
 
+<!-- ============ 第 5 步 ============ -->
+<section id="step5">
+  <h2>第 5 步 · 主角接入(输入 / 移动 / 动画 / 相机)</h2>
+  <p><strong>目标</strong>:第三人称主角能跑能跳,相机是魂系俯视构图。<strong>分工惯例从这步定型:重复管线进 C++,数值与表现留蓝图。</strong></p>
+  <h4>操作主线</h4>
+  <ol>
+    <li><strong>C++(管线)</strong>:弹簧臂+相机组件、<code>SetupPlayerInputComponent</code> 绑定 Enhanced Input、<code>Move/Look</code>、自由移动模式(角色朝移动方向转身);默认俯角做成 UPROPERTY <code>DefaultCameraPitch=-15</code>,BeginPlay 写 ControlRotation</li>
+    <li><strong>输入资产</strong>:IA_Move/Look/Jump + IMC(可脚本生成);WASD 修改器手动加:<strong>D 无 / A 取反 / W 拌和(YXZ)/ S 拌和+取反</strong>(bool 默认落 X 轴,原理见术语表)</li>
+    <li><strong>动画</strong>:普通混合空间 BS_Jog(横轴 Speed 0~400,Idle/Jog_Fwd)+ 动画蓝图双状态(Ground/Air),Speed 与 IsInAir 由事件图表驱动</li>
+    <li><strong>相机手感</strong>:臂长/延迟/碰撞在 CameraBoom 面板调</li>
+  </ol>
+  <div class="note bad"><strong>⚠️ 翻车实录 ×3</strong>:① 脚本给 IMC 写修改器"成功"但没生效——<code>map_key</code> 返回的是副本,修改器只能编辑器手加(错题本 P16);② 想给弹簧臂设"相对旋转 -15°"做默认俯角——开了 pawn 控制旋转后相对旋转被整体替换,纯摆设,正解是设控制器初始俯仰(P17);③ 用脚本搬 World Partition 地图连续失败——WP 地图搬家只能编辑器 GUI 拖拽(P15)。</div>
+  <div class="note"><strong>架构心得</strong>:移动模式决定混合空间维度——自由移动(转身朝移动方向)只要 1D 速度轴;方向×速度的 2D 混合是锁定模式(第 7 章)的事。别提前建用不到的复杂度。</div>
+</section>
+
+<!-- ============ 第 6 步 ============ -->
+<section id="step6">
+  <h2>第 6 步 · 三连击与伤害(进行中)</h2>
+  <p><strong>目标</strong>:左键三段普攻,命中扣血,体力消耗,连击窗口。</p>
+  <h4>设计一句话</h4>
+  <p>输入统一发 <code>Ability.Attack.Light</code>;三个 GA(标签 .Light.1/2/3)利用标签父子匹配同时被尝试,GA2/3 靠 <code>State.Combo.Window</code> 门槛卡死窗口外激活;命中帧和窗口开启都是<strong>蒙太奇时间轴上可拖的通知</strong>(自定义 AN_SendGameplayEvent 发 GameplayEvent),伤害走第 2 章就位的元属性通道。</p>
+  <div class="note"><strong>调试心法</strong>:GameplayEvent 链路故障全部静默丢失、零报错。WaitGameplayEvent 后先接 Print String 验证链路,再接正式逻辑。排查三问:通知放对帧了吗?标签两边拼写一致吗?事件发给对的 Actor 了吗?</div>
+  <p class="meta">详细构建步骤(GE_Damage/GE_ComboWindow/GA×3/木桩)见 <code>docs/log/04-三连击与伤害.md</code>。</p>
+</section>
+
 <!-- ==================== 后续 ==================== -->
 <section id="next">
   <h2>后续路线(本工程的计划表)</h2>
@@ -204,10 +231,13 @@ GameplayTagList=(Tag="Event",DevComment="")</pre>
   <h2>文档地图(本教程的配套资料,全部在仓库 docs/ 下)</h2>
   <table>
     <tr><th>文档</th><th>内容</th><th>什么时候读</th></tr>
+    <tr><td><a href="log/">docs/log/ 行动日志系列</a></td><td>每章一份 md:目标 / 行动步骤 / 踩坑索引 / 验收(00 版本管理 ~ 04 三连击)</td><td>按章节跟做/复习</td></tr>
     <tr><td><a href="index.html">index.html</a></td><td>项目主文档:计划表、各章节执行记录、名词表、资产清单</td><td>了解全局与进度</td></tr>
     <tr><td><a href="notes/gas-foundation.html">开发者笔记 01 · GAS 地基</a></td><td>第 2 步的完整版:概念详解 + 全部代码 + 编辑器点击级步骤 + 报错速查</td><td>跟做第 2、3 步时</td></tr>
     <tr><td><a href="notes/code-walkthrough.html">开发者笔记 02 · 代码精读</a></td><td>四个代码文件逐行原文 + 逐行中文说明 + 宏的源码级展开</td><td>想真正读懂代码时(零基础友好)</td></tr>
     <tr><td><a href="reference/troubleshooting.html">故障速查手册(错题本)</a></td><td>P1~P14:环境与编译问题,按报错关键词索引,症状→快速解法</td><td>卡住时 Ctrl+F</td></tr>
+    <tr><td><a href="reference/glossary.html">中英术语对照表</a></td><td>UE 中文版界面 ↔ 英文原名(含 WASD 修改器原理)</td><td>找不到菜单/参数时</td></tr>
+    <tr><td><a href="reference/custom-changes.html">自定义改动清单</a></td><td>所有非引擎默认的代码/配置/资产/参数值总账</td><td>迁移核对、数值查阅</td></tr>
     <tr><td><a href="research/01-官方格斗模板侦察.md">调研 01 · 官方格斗模板侦察</a></td><td>Variant_Combat 模板拆解:可借鉴什么、为什么不用它做底</td><td>第 4、6 章参考</td></tr>
     <tr><td><a href="research/02-GAS学习资源调研.md">调研 02 · GAS 学习资源</a></td><td>tranek 文档 / Narxim 示例 / Lyra / 锁定插件等精选资源与使用顺序</td><td>想深入 GAS 时</td></tr>
   </table>
