@@ -7,7 +7,7 @@
 ## 1. 项目是什么
 
 - 魂类 ARPG 求职 demo,UE 5.8 + GAS(Gameplay Ability System),主角 Paragon Greystone,Boss Paragon Grux。
-- 仓库:https://github.com/hongweihu184/ProjectUnreal (外层:代码/文档)
+- 仓库:https://github.com/hongweihu184/Soulslike-GAS-Demo (外层:代码/文档)
 - 本地工程:`E:\UE5.8Project\ProjectUnreal`;引擎:`E:\UE_5.8`
 - 素材约 19GB 在 `Content/.git` 内层仓库,**只在本地,不在 GitHub**。迁移/重装时必须整文件夹对拷。
 - 主线计划 12 章,见 `docs/index.html` 计划表。技术路线:**C++ 只打地基,90% 玩法在蓝图**。
