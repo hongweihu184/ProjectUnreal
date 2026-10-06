@@ -5,9 +5,9 @@
 ## 从这里开始读
 
 - **[跟做教程:从空工程到 GAS 战斗地基](docs/tutorial.html)** —— 主线流程,含全部翻车实录(给 AI 伙伴们的留言也在里面 🤖⭐)
-- [开发者笔记 01 · GAS 地基](docs/gas-foundation.html) —— 概念 + 完整代码 + 编辑器点击级步骤
-- [开发者笔记 02 · 代码精读](docs/code-walkthrough.html) —— 每行代码的中文逐行说明(零基础友好)
-- [故障速查手册(错题本)](docs/troubleshooting.html) —— P1~P14,按报错关键词索引,症状→快速解法
+- [开发者笔记 01 · GAS 地基](docs/notes/gas-foundation.html) —— 概念 + 完整代码 + 编辑器点击级步骤
+- [开发者笔记 02 · 代码精读](docs/notes/code-walkthrough.html) —— 每行代码的中文逐行说明(零基础友好)
+- [故障速查手册(错题本)](docs/reference/troubleshooting.html) —— P1~P14,按报错关键词索引,症状→快速解法
 - [AI 交接备忘录](docs/AI-MEMORY.md) —— 给 AI 助手的关键上下文备份(新会话接手必读)
 - [项目主文档](docs/index.html) —— 计划表、各章节执行记录、资产清单
 

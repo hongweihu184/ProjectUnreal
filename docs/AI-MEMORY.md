@@ -44,7 +44,7 @@
 - 素材:`Content/ParagonGreystone/.../Meshes/Greystone.uasset`(已挂在 BP_BaseCharacter 上);`Greystone_AnimBlueprint.uasset` 与 `GreystonePlayerCharacter.uasset` 是配置参考对象;`AnimationTestMap.umap` 可预览全部动画。
 - 关键动画:Idle / Jog_*(含 Start/Stop/Pivot)/ Jump_* / Attack_PrimaryA~C(含 _Montage)/ HitReact_* / Death / RMB_Targeting。**注意:素材无翻滚动画**,第 5 章需专门解决(见 asset-map.html)。
 - 任务:新建 Content/Maps/、Content/Input/;Enhanced Input(IA_Move/Look/Jump + IMC);自建或改造 AnimBP;相机(弹簧臂);替换 BP_BaseCharacter 占位配置,让 Greystone 跑跳起来。
-- 资产目录与用途索引见 `docs/asset-map.html`。
+- 资产目录与用途索引见 `docs/reference/asset-map.html`。
 
 ## 6. 关键教训(血泪,别再犯)
 
