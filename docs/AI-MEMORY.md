@@ -39,11 +39,12 @@
 
 ## 5. 当前进行中的事(接手点)
 
-第 2 章编辑器收尾,用户正在做:
-1. GE_InitAttributes:`Content/Gameplay/` 下,Duration=Instant,4 条修饰符(MaxHealth/Health/MaxStamina/Stamina 全 Override 100)。**资产已创建,修饰符待配**。
-2. BP_BaseCharacter:继承 C++ BaseCharacter,填 InitAttributesEffect=GE_InitAttributes,Auto Possess Player=Player 0,配骨骼网格(暂用 SKM_Manny_Simple)。
-3. 放进关卡 → PIE → `showdebug abilitysystem` 看到 100 → 第 2 章通关。
-4. 通关后:更新 index.html 状态/执行记录 → commit → 进第 3 章(Greystone 主角接入:骨骼/AnimBP/Enhanced Input/相机)。
+**第 2 章已于 2026-10-07 通关**(showdebug abilitysystem 验收通过,Health/Stamina 100)。
+下一步是**第 3 章 · 主角接入**(index.html 计划表):
+- 素材:`Content/ParagonGreystone/.../Meshes/Greystone.uasset`(已挂在 BP_BaseCharacter 上);`Greystone_AnimBlueprint.uasset` 与 `GreystonePlayerCharacter.uasset` 是配置参考对象;`AnimationTestMap.umap` 可预览全部动画。
+- 关键动画:Idle / Jog_*(含 Start/Stop/Pivot)/ Jump_* / Attack_PrimaryA~C(含 _Montage)/ HitReact_* / Death / RMB_Targeting。**注意:素材无翻滚动画**,第 5 章需专门解决(见 asset-map.html)。
+- 任务:新建 Content/Maps/、Content/Input/;Enhanced Input(IA_Move/Look/Jump + IMC);自建或改造 AnimBP;相机(弹簧臂);替换 BP_BaseCharacter 占位配置,让 Greystone 跑跳起来。
+- 资产目录与用途索引见 `docs/asset-map.html`。
 
 ## 6. 关键教训(血泪,别再犯)
 
