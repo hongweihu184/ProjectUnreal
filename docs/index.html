@@ -91,6 +91,7 @@
   <a href="reference/troubleshooting.html">★ 故障速查手册</a>
   <a href="reference/glossary.html">中英术语对照表</a>
   <a href="reference/asset-map.html">资产目录手册</a>
+  <a href="reference/custom-changes.html">自定义改动清单</a>
   <a href="#appA">附录 A · 资源与参考链接</a>
   <a href="#appB">附录 B · 名词对照表</a>
   <a href="#appC">附录 C · 踩坑记录</a>
@@ -149,7 +150,7 @@
     <tr><td>0</td><td>git init + 基线提交</td><td>工程纳入版本管理，可随时回滚</td><td>git / .gitignore</td><td>0.5 次</td><td><span class="tag t-done">完成</span></td></tr>
     <tr><td>1</td><td>工程 C++ 化</td><td>生成 Source 与空模块，编译通过，编辑器正常打开</td><td>模块 / Build.cs / UBT</td><td>1 次</td><td><span class="tag t-done">完成</span></td></tr>
     <tr><td>2</td><td>GAS 地基</td><td>ASC + AttributeSet(HP/体力) + 初始化 GE，属性面板可见数值</td><td>ASC / AttributeSet / GE / GameplayTag</td><td>2 次</td><td><span class="tag t-done">完成</span></td></tr>
-    <tr><td>3</td><td>主角接入</td><td>Greystone 可跑跳、相机/输入完整，替代默认角色</td><td>Enhanced Input / AnimBP / CharacterMovement</td><td>1–2 次</td><td><span class="tag t-todo">待做</span></td></tr>
+    <tr><td>3</td><td>主角接入</td><td>Greystone 可跑跳、相机/输入完整，替代默认角色</td><td>Enhanced Input / AnimBP / CharacterMovement</td><td>1–2 次</td><td><span class="tag t-done">完成</span></td></tr>
     <tr><td>4</td><td>三连击 + 伤害</td><td>鼠标连点出三段连击；命中木桩扣血；体力消耗</td><td>GA / AbilityTask / GameplayEvent / 伤害 GE</td><td>2–3 次</td><td><span class="tag t-todo">待做</span></td></tr>
     <tr><td>5</td><td>翻滚 + 无敌帧 + 受击死亡</td><td>翻滚躲伤害；被打有硬直；血空播死亡</td><td>AnimNotifyState / GrantedTag / Immunity</td><td>2 次</td><td><span class="tag t-todo">待做</span></td></tr>
     <tr><td>6</td><td>敌人与 AI</td><td>小兵会巡逻/追击/攻击/受击/死亡，2–3 只围殴有走位</td><td>StateTree / EQS / AI 挂 ASC</td><td>2–3 次</td><td><span class="tag t-todo">待做</span></td></tr>
@@ -282,7 +283,7 @@
 
 <!-- ============ 第 3 章 ============ -->
 <section id="ch3">
-  <h2>第 3 章 · 主角接入 <span class="tag t-todo">待做</span></h2>
+  <h2>第 3 章 · 主角接入 <span class="tag t-done">完成</span></h2>
   <div class="card">
     <h4>目标</h4>
     <p>Greystone 替换默认角色：第三人称相机 + WASD 跑动 + 跳跃，动作衔接自然。</p>
@@ -297,7 +298,7 @@
     <h4>验收</h4>
     <p>PIE 中 Greystone 跑动、转向、跳跃正常，相机跟随，无滑步（或滑步在可接受范围，记录待打磨）。</p>
     <h4>实际执行记录</h4>
-    <p class="meta">（执行后填写）</p>
+    <p>2026-10-07 完成。实际路径与原计划略有出入,以实际为准:① 输入:IA/IMC 由 Python 脚本生成(Tools/setup_input.py),WASD 修改器因脚本无法写回改为编辑器手动加(错题本 P16;原理见术语表"WASD 修改器原理");② 移动/相机/输入绑定全部 C++ 化(BaseCharacter:弹簧臂+相机+SetupPlayerInputComponent+Move/Look),蓝图零节点;③ 动画:自建 BS_Jog(普通混合空间,横轴 Speed 0~400)与 ABP_Greystone(Ground/Air 双状态),事件图表驱动 Speed/IsInAir;④ 移动模式:OrientToMovement 自由移动(角色朝移动方向转身,1D 混合即可;2D 方向混合留给第 7 章锁定);⑤ 相机:臂长/延迟/碰撞在 CameraBoom 面板调,默认俯角走"控制器初始俯仰"方案(C++ UPROPERTY DefaultCameraPitch=-15,弹簧臂相对旋转方案被源码证伪,错题本 P17);⑥ 测试图搬家至 Maps/NewMap(GUI 拖拽,WP 地图脚本搬家失败记 P15),默认图配置已同步。验收:WASD 四向走跑、空格跳跃、Idle↔Jog 过渡、-15° 俯视构图,滑步在可接受范围。GameMode/PlayerController 均用引擎默认,未自建 BP_GreystoneCharacter(沿用 BP_BaseCharacter)。</p>
   </div>
 </section>
 

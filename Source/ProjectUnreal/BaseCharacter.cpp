@@ -60,6 +60,13 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (AController* C = GetController())
+	{
+		FRotator ControlRot = C->GetControlRotation();
+		ControlRot.Pitch = DefaultCameraPitch;
+		C->SetControlRotation(ControlRot);
+	}
+
 	if (AbilitySystemComponent && InitAttributesEffect)
 	{
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();

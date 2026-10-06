@@ -39,12 +39,12 @@
 
 ## 5. 当前进行中的事(接手点)
 
-**第 2 章已于 2026-10-07 通关**(showdebug abilitysystem 验收通过,Health/Stamina 100)。
-下一步是**第 3 章 · 主角接入**(index.html 计划表):
-- 素材:`Content/ParagonGreystone/.../Meshes/Greystone.uasset`(已挂在 BP_BaseCharacter 上);`Greystone_AnimBlueprint.uasset` 与 `GreystonePlayerCharacter.uasset` 是配置参考对象;`AnimationTestMap.umap` 可预览全部动画。
-- 关键动画:Idle / Jog_*(含 Start/Stop/Pivot)/ Jump_* / Attack_PrimaryA~C(含 _Montage)/ HitReact_* / Death / RMB_Targeting。**注意:素材无翻滚动画**,第 5 章需专门解决(见 asset-map.html)。
-- 任务:新建 Content/Maps/、Content/Input/;Enhanced Input(IA_Move/Look/Jump + IMC);自建或改造 AnimBP;相机(弹簧臂);替换 BP_BaseCharacter 占位配置,让 Greystone 跑跳起来。
-- 资产目录与用途索引见 `docs/reference/asset-map.html`。
+**第 3 章已于 2026-10-07 通关**(WASD 走跑跳、Idle↔Jog、-15° 俯视相机;错题本 P15/P16/P17 出自本章)。
+下一步是**第 4 章 · 三连击与伤害**(index.html 计划表,本项目核心章):
+- 素材:`Attack_PrimaryA/B/C_Montage`(现成三段蒙太奇,直接可用);命中帧做法参考格斗模板 AM_ComboAttack + AN_AttackCombo/AN_AttackDamage(见 research/01)。
+- 任务:GA_Attack_Light(蓝图:PlayMontage + WaitGameplayEvent)→ AN 发 GameplayEvent(Event.Montage.Attack.Hit)→ SphereTrace 命中 → GE_Damage(走 Damage 元属性通道,PostGameplayEffectExecute 已就绪)→ 体力消耗 GE(Cost)→ 连击窗口(格斗模板 AN_AttackCombo 思路:窗口内再按跳下一段)。
+- 新标签预计:Ability.Attack.Light、Event.Montage.Attack.Hit、State.Attacking。
+- 参数约定:新数值都登记进 docs/reference/custom-changes.html 的参数表。
 
 ## 6. 关键教训(血泪,别再犯)
 
