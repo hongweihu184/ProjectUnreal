@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>资产目录手册 · Content 资源地图 · 魂类 ARPG Demo</title>
+<style>
+  :root{
+    --bg:#14161a; --bg2:#1c1f26; --bg3:#242833; --fg:#d8dce4; --dim:#8a91a0;
+    --accent:#c8a15a; --accent2:#7aa2f7; --ok:#6fbf73; --warn:#e0a050; --bad:#e06060;
+    --border:#2e3340;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--fg); font:15px/1.8 "Microsoft YaHei","PingFang SC",sans-serif;
+       display:flex; min-height:100vh;}
+  nav{width:250px; flex:0 0 250px; background:var(--bg2); border-right:1px solid var(--border);
+      position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 14px;}
+  nav h1{font-size:16px; color:var(--accent); margin-bottom:4px;}
+  nav .sub{font-size:12px; color:var(--dim); margin-bottom:16px;}
+  nav a{display:block; color:var(--fg); text-decoration:none; font-size:13.5px;
+        padding:5px 10px; border-radius:6px; border-left:2px solid transparent;}
+  nav a:hover{background:var(--bg3);}
+  nav .grp{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin:14px 0 4px 10px;}
+  main{flex:1; max-width:960px; padding:40px 48px 120px;}
+  section{margin-bottom:48px;}
+  h2{font-size:24px; color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:16px;}
+  h3{font-size:18px; color:var(--accent2); margin:24px 0 10px;}
+  p{margin:8px 0;}
+  ul,ol{margin:8px 0 8px 24px;}
+  li{margin:3px 0;}
+  code{background:var(--bg3); padding:1px 6px; border-radius:4px; font-family:Consolas,monospace; font-size:12.5px; color:#e8c07d;}
+  pre{background:#101216; border:1px solid var(--border); border-radius:8px; padding:14px 16px;
+      overflow-x:auto; margin:10px 0; font-family:Consolas,monospace; font-size:13px; line-height:1.6; color:#c9d1e0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th{background:var(--bg3); color:var(--accent); text-align:left;}
+  th,td{border:1px solid var(--border); padding:7px 12px; vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .note{border-left:3px solid var(--accent2); background:var(--bg2); padding:10px 16px; margin:12px 0; border-radius:0 8px 8px 0;}
+  .warn{border-left:3px solid var(--warn);}
+  .ok{border-left:3px solid var(--ok);}
+  a{color:var(--accent2);}
+  .meta{color:var(--dim); font-size:12.5px;}
+  @media (max-width:900px){ nav{display:none;} main{padding:24px;} }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <h1>资产目录手册</h1>
+  <div class="sub">Content 资源地图<br>素材在哪、用哪个<br>2026-10-07 实际盘点</div>
+  <a href="index.html">← 返回主文档</a>
+  <div class="grp">总览</div>
+  <a href="#overview">Content 全貌</a>
+  <a href="#rules">使用铁律</a>
+  <div class="grp">重点资产</div>
+  <a href="#greystone">Greystone(主角)</a>
+  <a href="#grux">Grux(Boss)</a>
+  <a href="#minions">Minions(小兵)</a>
+  <a href="#others">其余角色包</a>
+  <div class="grp">自有资产</div>
+  <a href="#own">我们的目录约定</a>
+</nav>
+
+<main>
+
+<!-- ==================== 总览 ==================== -->
+<section id="overview">
+  <h2>Content 全貌</h2>
+  <p>Content 根目录 = 8 个 Epic Paragon 角色包(共约 19GB,内层 git 仓库管理)+ 我们自己创建的资产。盘点日期 2026-10-07。</p>
+  <table>
+    <tr><th>目录</th><th>体积</th><th>角色</th><th>在本项目的定位</th></tr>
+    <tr><td><code>ParagonGreystone/</code></td><td>2.2 GB</td><td>Greystone(剑盾骑士)</td><td><strong>主角</strong> ⭐</td></tr>
+    <tr><td><code>ParagonGrux/</code></td><td>3.0 GB</td><td>Grux(双斧巨汉)</td><td><strong>Boss</strong> ⭐</td></tr>
+    <tr><td><code>ParagonMinions/</code></td><td>4.8 GB</td><td>各路小兵</td><td><strong>普通敌人</strong> ⭐</td></tr>
+    <tr><td><code>ParagonBoris/</code></td><td>1.4 GB</td><td>Boris(巨兽)</td><td>备用(精英怪候选)</td></tr>
+    <tr><td><code>ParagonKhaimera/</code></td><td>2.1 GB</td><td>Khaimera(野兽战士)</td><td>备用</td></tr>
+    <tr><td><code>ParagonSevarog/</code></td><td>1.4 GB</td><td>Sevarog(亡灵骑士)</td><td>备用</td></tr>
+    <tr><td><code>ParagonNarbash/</code></td><td>2.7 GB</td><td>Narbash(鼓手)</td><td>备用</td></tr>
+    <tr><td><code>ParagonCountess/</code></td><td>1.8 GB</td><td>Countess(女伯爵)</td><td>备用</td></tr>
+  </table>
+  <h3>自有资产(我们创建的)</h3>
+  <table>
+    <tr><th>路径</th><th>内容</th></tr>
+    <tr><td><code>Content/Gameplay/</code></td><td>GAS 与角色蓝图:<code>GE_InitAttributes</code>、<code>BP_BaseCharacter</code>(以后 GA/GE/敌人蓝图都放这)</td></tr>
+    <tr><td><code>Content/NewMap.umap</code></td><td>第一张测试关卡(OpenWorld 模板,编辑器连通性验证用,正式关卡会另建)</td></tr>
+    <tr><td><code>Content/__ExternalActors__/ __ExternalObjects__/</code></td><td>NewMap 的 World Partition 自动生成的外部 Actor 文件,不用手碰</td></tr>
+  </table>
+</section>
+
+<!-- ==================== 铁律 ==================== -->
+<section id="rules">
+  <h2>使用铁律(素材管理的五条规矩)</h2>
+  <ol>
+    <li><strong>Paragon 包内的资产:只引用,不移动、不改名、不复制。</strong>官方目录结构保持原样,升级/换素材/别人接手时不混乱。</li>
+    <li><strong>我们创建的资产一律放自己的目录</strong>(<code>Content/Gameplay/</code>、以后的 <code>Content/Maps/</code> 等),和 Paragon 包泾渭分明。</li>
+    <li><strong>引用骨骼网格时认准 <code>Meshes/</code> 里的主资产</strong>(如 <code>Greystone.uasset</code>),不要选 Skeleton(纯骨架)或 PhysicsAsset(物理资产)。</li>
+    <li>动画文件名后缀:<code>_Montage</code> = 已打包好的蒙太奇(可直接用);<code>_MSA</code> = Motion Matching 用的姿势库(本项目不用);无后缀 = 普通动画序列(要自己组蒙太奇)。</li>
+    <li>Paragon 自带的 <code>xxPlayerCharacter.uasset</code> / <code>xx_AnimBlueprint.uasset</code> 是<strong>参考对象</strong>(抄配置),不直接当游戏角色用——我们的角色体系是 GAS 的 BaseCharacter。</li>
+  </ol>
+</section>
+
+<!-- ==================== Greystone ==================== -->
+<section id="greystone">
+  <h2>Greystone(主角)⭐</h2>
+  <p>根目录:<code>Content/ParagonGreystone/Characters/Heroes/Greystone/</code></p>
+  <pre>Greystone/
+├── Meshes/
+│   ├── Greystone.uasset               ← 骨骼网格本体(已在 BP_BaseCharacter 引用)
+│   ├── Greystone_Skeleton.uasset      ← 骨架(纯骨骼,别当模型选)
+│   └── Greystone_PhysicsAsset.uasset  ← 物理资产(布娃娃用)
+├── Animations/                        ← 145 个动画,分类见下表
+│   └── AimOffsets/                    ← 瞄准偏移(锁定姿态用,第 7 章)
+├── Materials/ Textures/ Skins/        ← 材质贴图皮肤
+├── Greystone_AnimBlueprint.uasset     ← 官方动画蓝图(第 3 章评估参考)
+├── GreystonePlayerCharacter.uasset    ← 官方角色蓝图(配置参考对象)
+└── AnimationTestMap.umap              ← 官方动画预览图(可打开看全部动画效果)</pre>
+
+  <h3>关键动画清单(按用途)</h3>
+  <table>
+    <tr><th>用途</th><th>资产</th><th>用于</th></tr>
+    <tr><td>三段普攻</td><td><code>Attack_PrimaryA/B/C</code>(含 <code>_Montage</code> 版,可直接用)</td><td>第 4 章连击</td></tr>
+    <tr><td>重攻击/战技候选</td><td><code>Attack_A~C (Fast/Med/Slow)</code> 系列、<code>Ability_Q/E/R/Ultimate</code></td><td>第 4 章选配</td></tr>
+    <tr><td>四方向受击</td><td><code>HitReact_Front/Back/Left/Right</code></td><td>第 5 章</td></tr>
+    <tr><td>死亡</td><td><code>Death</code></td><td>第 5 章</td></tr>
+    <tr><td>眩晕</td><td><code>Stun_Start</code>、<code>Stun_Idle</code></td><td>削韧系统(扩展)</td></tr>
+    <tr><td>弹反预留</td><td><code>Deflect_InPlace</code></td><td>扩展</td></tr>
+    <tr><td>锁定姿态</td><td><code>RMB_Targeting</code> + <code>AimOffsets/</code></td><td>第 7 章</td></tr>
+    <tr><td>移动全套</td><td><code>Idle</code>、<code>Jog_Fwd/Bwd/Left/Right</code>(含 Start/Stop/Pivot180/Circle 变体)、上下坡变体</td><td>第 3 章</td></tr>
+    <tr><td>跳跃</td><td><code>Jump_Start/Apex/Fall/Land/Recovery</code></td><td>第 3 章</td></tr>
+    <tr><td>原地转身</td><td><code>Spin_Jog_*</code> 系列</td><td>第 3 章选配</td></tr>
+  </table>
+  <div class="note"><strong>注意</strong>:本包<strong>没有翻滚/闪避动画</strong>(无 Roll/Dodge)。第 5 章的翻滚方案候选:① 用 <code>Jump_Melee</code> 等动作改造;② 从其他 Paragon 包借(骨架不同需重定向);③ 缩短位移的冲刺动画。到第 5 章再定。</div>
+</section>
+
+<!-- ==================== Grux ==================== -->
+<section id="grux">
+  <h2>Grux(Boss)⭐</h2>
+  <p>根目录:<code>Content/ParagonGrux/Characters/Heroes/Grux/</code>(内部结构与 Greystone 相同)</p>
+  <ul>
+    <li><strong>网格</strong>:<code>Meshes/Grux.uasset</code></li>
+    <li><strong>招式动画候选</strong>(第 10 章 Boss 招式的原材料):<code>Attack_Melee_Air</code>、<code>Cast</code>、<code>DoublePain</code>(疑似招牌连击)、<code>Gruxx_Ultimate_Noise_Additive</code>、<code>Emote_Master_BattleCry_T3</code>(吼叫,可作转阶段演出)</li>
+    <li><strong>受击/死亡</strong>:<code>HitReact_Front/Back/Left/Right</code>、<code>Death_A</code>、<code>Death_B</code>(两种死亡,可作阶段演出)</li>
+    <li><strong>移动</strong>:<code>Idle</code>、<code>Jog_*</code> 系列、<code>Blendspaces/</code>(官方配好的移动混合空间)</li>
+    <li><strong>音效</strong>:<code>Sounds/</code>(Boss 战吼叫、打击音,第 10/11 章)</li>
+    <li>官方参考:<code>Grux_AnimBlueprint</code>、<code>GruxPlayerCharacter</code>、<code>AnimationTestMap</code></li>
+  </ul>
+</section>
+
+<!-- ==================== Minions ==================== -->
+<section id="minions">
+  <h2>Minions(小兵)⭐</h2>
+  <p>根目录:<code>Content/ParagonMinions/Characters/</code>,四个子目录:</p>
+  <table>
+    <tr><th>子目录</th><th>内容</th></tr>
+    <tr><td><code>Minions/</code></td><td>小兵角色本体(近战/远程等类型,第 6 章逐一评估)</td></tr>
+    <tr><td><code>Buff/</code></td><td>强化版小兵(红蓝 Buff 怪,可作精英怪)</td></tr>
+    <tr><td><code>Global/</code></td><td>共享资源(所有小兵通用的材质/动画基础)</td></tr>
+    <tr><td><code>Maps/</code></td><td>官方预览地图</td></tr>
+  </table>
+  <p class="meta">第 6 章开工时再细化到具体小兵个体的资产路径,先记录在案。</p>
+</section>
+
+<!-- ==================== 其他 ==================== -->
+<section id="others">
+  <h2>其余角色包(备用)</h2>
+  <p>结构与上面完全一致:<code>Paragon角色名/Characters/Heroes/角色名/{Meshes, Animations, ...}</code>。短期内不深入,需要时照 Greystone 的地图类推。各自也带 <code>AnimationTestMap</code>,想看某个角色的全部动画就直接开那张图。</p>
+</section>
+
+<!-- ==================== 自有资产约定 ==================== -->
+<section id="own">
+  <h2>我们的目录约定(随着项目生长)</h2>
+  <table>
+    <tr><th>目录</th><th>放什么</th><th>状态</th></tr>
+    <tr><td><code>Content/Gameplay/</code></td><td>GAS 资产(GE/GA)与角色蓝图(BP_BaseCharacter、以后的敌人蓝图)</td><td>已建</td></tr>
+    <tr><td><code>Content/Maps/</code></td><td>正式关卡(L_TestGAS 测试图、正式灰盒关卡)</td><td>第 3 章建</td></tr>
+    <tr><td><code>Content/UI/</code></td><td>UMG 控件(血条、体力条、Boss 条)</td><td>第 8 章建</td></tr>
+    <tr><td><code>Content/Input/</code></td><td>Enhanced Input 的 IMC/IA 资产</td><td>第 3 章建</td></tr>
+  </table>
+  <div class="note ok"><strong>一句话</strong>:Paragon 是"图书馆"(只读引用),Gameplay 等自有目录是"我们的书房"(随便写)。两边永不混放。</div>
+</section>
+
+</main>
+</body>
+</html>
