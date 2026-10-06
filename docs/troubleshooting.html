@@ -76,6 +76,7 @@
   <div class="grp">其他</div>
   <a href="#p12">P12 git push 连接重置</a>
   <a href="#p13">P13 引擎首次启动慢</a>
+  <a href="#p14">P14 游戏模块不加载</a>
 </nav>
 
 <main>
@@ -96,6 +97,7 @@
     <tr><td><a href="#p8">"modifies the values of properties ... not allowed"</a></td><td>Target.cs 的 BuildSettingsVersion 改 V7</td></tr>
     <tr><td><a href="#p11">"error C2027: 使用了未定义类型 FGameplayEffectModCallbackData"</a></td><td>cpp 里补 #include "GameplayEffectExtension.h"</td></tr>
     <tr><td><a href="#p12">git push "Connection was reset"</a></td><td>给 git 配本机代理(见 P12)</td></tr>
+    <tr><td><a href="#p14">GE 修饰符里找不到自定义属性 / 蓝图搜不到自己的 C++ 类</a></td><td>.uproject 的 Modules 被清空 → 补回模块注册,重启编辑器</td></tr>
   </table>
 </section>
 
@@ -278,6 +280,37 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
   <p class="sym">症状:首次打开工程卡很久,日志狂刷 LogShaderCompilers;19GB 素材工程首次加载更慢</p>
   <h4>定性</h4>
   <p>首次启动要编译全部着色器变体 + 建立 DDC 缓存,<strong>正常现象,等</strong>。之后的启动会快很多。日志里 <code>Failed to load 'aqProf.dll' / 'VtuneApi.dll'</code> 是无害的可选性能分析工具缺失,忽略。</p>
+</section>
+
+<!-- ============ P14 ============ -->
+<section id="p14">
+  <h2>P14 · 游戏模块不加载(GE 里找不到自定义属性 / 蓝图搜不到 C++ 类) <span class="fix">已解决</span></h2>
+  <p class="sym">症状:GE 修饰符的 Attribute 下拉只有引擎自带属性;蓝图"选择父类"里搜不到自己写的 C++ 类。编辑器能正常打开,日志无任何报错</p>
+  <h4>原因</h4>
+  <p><code>.uproject</code> 里的 <code>"Modules"</code> 数组被清空成了 <code>[]</code>。本工程是在编辑器里开关插件(VisualStudioTools)时,编辑器重写 .uproject 顺带把模块注册清空的。Modules 数组是引擎加载游戏模块的花名册——空了,编译好的 dll 就永远不被加载,而且<strong>全程静默,没有任何报错</strong>,排查方向极具迷惑性。</p>
+  <h4>解法</h4>
+  <ol>
+    <li>打开 <code>.uproject</code>,确认 Modules 数组包含游戏模块:
+    <pre>"Modules": [
+  {
+    "Name": "ProjectUnreal",
+    "Type": "Runtime",
+    "LoadingPhase": "Default"
+  }
+]</pre></li>
+    <li>重启编辑器</li>
+  </ol>
+  <h4>验证方法</h4>
+  <ol>
+    <li>日志 <code>Saved/Logs/ProjectUnreal.log</code> 里搜 <code>InternalLoadLibrary: 'ProjectUnreal'</code>——有这行才是真的加载了</li>
+    <li>或 PowerShell:<code>(Get-Process UnrealEditor).Modules | Where-Object {$_.ModuleName -like "*ProjectUnreal*"}</code></li>
+  </ol>
+  <h4>教训</h4>
+  <ul>
+    <li><strong>"编辑器能打开" ≠ "模块已加载"</strong>。涉及 C++ 类的功能(自定义属性、蓝图父类)突然消失时,第一反应查 .uproject 的 Modules 数组</li>
+    <li>手动编辑过 .uproject 后,留意编辑器再次重写它的时机(开关插件、改项目设置),重要字段要定期检查 git diff</li>
+    <li>此坑 2026-10-07 实录:GE 属性失踪 → 模块未加载 → Modules 被清空,三级倒查才定位</li>
+  </ul>
 </section>
 
 </main>
