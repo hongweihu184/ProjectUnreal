@@ -3,7 +3,13 @@
   "EngineAssociation": "5.8",
   "Category": "",
   "Description": "",
-  "Modules": [],
+  "Modules": [
+    {
+      "Name": "ProjectUnreal",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
   "Plugins": [
     {
       "Name": "ModelingToolsEditorMode",
