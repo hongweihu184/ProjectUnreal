@@ -81,6 +81,7 @@
   <a href="#p16">P16 IMC 修改器脚本写不进</a>
   <a href="#p17">P17 弹簧臂相对旋转无效</a>
   <a href="#p18">P18 大规模搬素材的连环坑</a>
+  <a href="#p19">P19 AI 给了不存在的节点名</a>
 </nav>
 
 <main>
@@ -392,6 +393,21 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
     <li><strong>素材库位置第一天定好,之后永不搬</strong>。其余 7 个 Paragon 包永久留根目录,External 仅 Boris 特例</li>
     <li>目录洁癖要算成本账:一次"拖一下"的整理花掉一天,不值</li>
     <li>修复重定向器在 5.8 中文版入口难找,备选:删除旧文件夹让编辑器自己做引用检查</li>
+  </ul>
+</section>
+
+<!-- ============ P19 ============ -->
+<section id="p19">
+  <h2>P19 · AI 凭经验给出不存在的蓝图节点 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:AI 让找"Break Gameplay Tag(拆解 GameplayTag)"节点,编辑器里根本不存在</p>
+  <h4>原因</h4>
+  <p>FGameplayTag 没有原生拆解节点。AI 凭"UE 里多数结构体有 Break"的通用经验想当然,未核实源码。</p>
+  <h4>解法</h4>
+  <p>官方节点 <strong>Get Tag Name</strong>(获取标签名称,<code>BlueprintGameplayTagLibrary.h:57</code>,BlueprintPure),直接返回 Name,正好喂给 GetNotifyName 的返回值。连法:<code>EventTag → Get Tag Name → Return Value</code>。</p>
+  <h4>教训(双向)</h4>
+  <ul>
+    <li><strong>对 AI</strong>:给节点名/函数名之前必须核对引擎源码,"以为存在"≠"源码存在"。同类前车之鉴:P16(map_key 副本)</li>
+    <li><strong>对用户</strong>:AI 给的节点名找不到时,直接质疑并要求核实源码——这比照着错答案翻菜单快得多</li>
   </ul>
 </section>
 
