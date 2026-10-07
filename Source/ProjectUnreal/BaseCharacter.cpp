@@ -10,6 +10,8 @@
 #include "InputAction.h"
 #include "Abilities/GameplayAbility.h"
 #include "GameplayTagContainer.h"
+#include "Components/CapsuleComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -30,6 +32,18 @@ ABaseCharacter::ABaseCharacter()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
+
+	WeaponCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("WeaponCollision"));
+	WeaponCollision->SetupAttachment(GetMesh(), TEXT("sword_bottom"));
+	WeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponCollision->SetCollisionObjectType(ECC_WorldDynamic);
+	WeaponCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	WeaponCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	WeaponCollision->OnComponentBeginOverlap.AddDynamic(this, &ABaseCharacter::OnWeaponOverlap);
+
+	WeaponCollision->SetCapsuleSize(WeaponCollisionRadius, WeaponCollisionHalfHeight);
+	WeaponCollision->SetRelativeLocation(WeaponCollisionCenter);
+	WeaponCollision->SetRelativeRotation(WeaponCollisionRotation);
 
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMCFinder(TEXT("/Game/Input/IMC_Default.IMC_Default"));
 	if (IMCFinder.Succeeded())
@@ -128,12 +142,51 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 }
 
+void ABaseCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (WeaponCollision)
+	{
+		WeaponCollision->SetCapsuleSize(WeaponCollisionRadius, WeaponCollisionHalfHeight);
+		WeaponCollision->SetRelativeLocation(WeaponCollisionCenter);
+		WeaponCollision->SetRelativeRotation(WeaponCollisionRotation);
+	}
+}
+
 void ABaseCharacter::OnAttackInput()
 {
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag(FName("Ability.Attack.Light"))));
 	}
+}
+
+void ABaseCharacter::SetWeaponCollisionEnabled(bool bEnabled)
+{
+	if (bEnabled)
+	{
+		HitActorsThisSwing.Empty();
+		WeaponCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else
+	{
+		WeaponCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void ABaseCharacter::OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!OtherActor || OtherActor == this || HitActorsThisSwing.Contains(OtherActor))
+	{
+		return;
+	}
+	HitActorsThisSwing.Add(OtherActor);
+
+	FGameplayEventData Payload;
+	Payload.Instigator = this;
+	Payload.Target = OtherActor;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, FGameplayTag::RequestGameplayTag(FName("Event.Montage.Attack.Hit")), Payload);
 }
 
 void ABaseCharacter::Move(const FInputActionValue& Value)
