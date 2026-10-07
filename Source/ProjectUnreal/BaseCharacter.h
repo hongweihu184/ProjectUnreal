@@ -93,6 +93,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float WeaponCollisionHalfHeight = 50.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	bool bWeaponCollision = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	bool bAutoFitWeaponCollision = true;
+
+	void OnJumpInput();
+
 	UPROPERTY()
 	TSet<TObjectPtr<AActor>> HitActorsThisSwing;
 };

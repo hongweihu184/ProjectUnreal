@@ -132,7 +132,7 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		}
 		if (JumpAction)
 		{
-			EnhancedInput->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+			EnhancedInput->BindAction(JumpAction, ETriggerEvent::Started, this, &ABaseCharacter::OnJumpInput);
 			EnhancedInput->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 		}
 		if (AttackAction)
@@ -146,11 +146,44 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (WeaponCollision)
+	if (!WeaponCollision)
+	{
+		return;
+	}
+
+	WeaponCollision->SetVisibility(bWeaponCollision);
+	if (!bWeaponCollision)
+	{
+		return;
+	}
+
+	if (!bAutoFitWeaponCollision)
 	{
 		WeaponCollision->SetCapsuleSize(WeaponCollisionRadius, WeaponCollisionHalfHeight);
 		WeaponCollision->SetRelativeLocation(WeaponCollisionCenter);
 		WeaponCollision->SetRelativeRotation(WeaponCollisionRotation);
+		return;
+	}
+
+	USkeletalMeshComponent* M = GetMesh();
+	const FName BottomSocket(TEXT("sword_bottom"));
+	const FName TopSocket(TEXT("sword_top"));
+	if (M && M->DoesSocketExist(BottomSocket) && M->DoesSocketExist(TopSocket))
+	{
+		const FTransform BottomT = M->GetSocketTransform(BottomSocket);
+		const FVector Bottom = BottomT.GetLocation();
+		const FVector Top = M->GetSocketTransform(TopSocket).GetLocation();
+		const FVector Dir = Top - Bottom;
+		const float Len = Dir.Size();
+		if (Len > KINDA_SMALL_NUMBER)
+		{
+			WeaponCollision->SetCapsuleSize(WeaponCollisionRadius, Len * 0.5f);
+
+			const FVector LocalMid = BottomT.InverseTransformPosition(Bottom + Dir * 0.5f);
+			const FVector LocalDir = BottomT.InverseTransformVector(Dir / Len);
+			WeaponCollision->SetRelativeLocation(LocalMid);
+			WeaponCollision->SetRelativeRotation(FRotationMatrix::MakeFromZ(LocalDir).Rotator());
+		}
 	}
 }
 
@@ -160,6 +193,16 @@ void ABaseCharacter::OnAttackInput()
 	{
 		AbilitySystemComponent->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag(FName("Ability.Attack.Light"))));
 	}
+}
+
+void ABaseCharacter::OnJumpInput()
+{
+	if (AbilitySystemComponent && AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("State.MoveLocked"))))
+	{
+		return;
+	}
+
+	Jump();
 }
 
 void ABaseCharacter::SetWeaponCollisionEnabled(bool bEnabled)
@@ -191,6 +234,11 @@ void ABaseCharacter::OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void ABaseCharacter::Move(const FInputActionValue& Value)
 {
+	if (AbilitySystemComponent && AbilitySystemComponent->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(FName("State.MoveLocked"))))
+	{
+		return;
+	}
+
 	const FVector2D Axis = Value.Get<FVector2D>();
 	if (!Controller)
 	{
