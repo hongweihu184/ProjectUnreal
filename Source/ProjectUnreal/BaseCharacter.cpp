@@ -157,34 +157,9 @@ void ABaseCharacter::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
-	if (!bAutoFitWeaponCollision)
-	{
-		WeaponCollision->SetCapsuleSize(WeaponCollisionRadius, WeaponCollisionHalfHeight);
-		WeaponCollision->SetRelativeLocation(WeaponCollisionCenter);
-		WeaponCollision->SetRelativeRotation(WeaponCollisionRotation);
-		return;
-	}
-
-	USkeletalMeshComponent* M = GetMesh();
-	const FName BottomSocket(TEXT("sword_bottom"));
-	const FName TopSocket(TEXT("sword_top"));
-	if (M && M->DoesSocketExist(BottomSocket) && M->DoesSocketExist(TopSocket))
-	{
-		const FTransform BottomT = M->GetSocketTransform(BottomSocket);
-		const FVector Bottom = BottomT.GetLocation();
-		const FVector Top = M->GetSocketTransform(TopSocket).GetLocation();
-		const FVector Dir = Top - Bottom;
-		const float Len = Dir.Size();
-		if (Len > KINDA_SMALL_NUMBER)
-		{
-			WeaponCollision->SetCapsuleSize(WeaponCollisionRadius, Len * 0.5f);
-
-			const FVector LocalMid = BottomT.InverseTransformPosition(Bottom + Dir * 0.5f);
-			const FVector LocalDir = BottomT.InverseTransformVector(Dir / Len);
-			WeaponCollision->SetRelativeLocation(LocalMid);
-			WeaponCollision->SetRelativeRotation(FRotationMatrix::MakeFromZ(LocalDir).Rotator());
-		}
-	}
+	WeaponCollision->SetCapsuleSize(WeaponCollisionRadius, WeaponCollisionHalfHeight);
+	WeaponCollision->SetRelativeLocation(WeaponCollisionCenter);
+	WeaponCollision->SetRelativeRotation(WeaponCollisionRotation);
 }
 
 void ABaseCharacter::OnAttackInput()
