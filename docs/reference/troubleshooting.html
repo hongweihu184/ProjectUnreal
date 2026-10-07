@@ -80,6 +80,7 @@
   <a href="#p15">P15 WP 地图脚本搬家失败</a>
   <a href="#p16">P16 IMC 修改器脚本写不进</a>
   <a href="#p17">P17 弹簧臂相对旋转无效</a>
+  <a href="#p18">P18 大规模搬素材的连环坑</a>
 </nav>
 
 <main>
@@ -365,6 +366,32 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
   <ul>
     <li>"面板上摆着的参数"不等于"当前配置下有效"——弹簧臂在 pawn 控制旋转模式下,相对旋转就是个摆设</li>
     <li>相机角度有三个可写的层:控制器(轨道)、弹簧臂(仅不继承时)、相机组件(视角)。写之前先想清楚要改哪一层</li>
+  </ul>
+</section>
+
+<!-- ============ P18 ============ -->
+<section id="p18">
+  <h2>P18 · 大规模搬移素材包的连环坑(Paragon 迁入 External 实录) <span class="fix">已解决</span></h2>
+  <p class="sym">症状:搬完报错"依赖包不可用";残留包无法保存(Illegal reference to private object: SceneThumbnailInfo);无法重命名;删除时"未能加载部分资产";引用丢失(BP 的动画类/GE 断链)</p>
+  <h4>原因(四层)</h4>
+  <ol>
+    <li><strong>UE 引用记路径不记 GUID</strong>,搬家=重写全城地址,引擎需重存海量包(慢、吃内存)</li>
+    <li><strong>私有子对象跨包引用非法</strong>:缩略图信息(SceneThumbnailInfo)随新包走后,旧路径残包永远无法保存,进而无法重命名/移动</li>
+    <li><strong>无头 rename_asset 更新引用不彻底</strong>:更新了 GA 的引用,漏掉 BP 组件级引用,且部分包连重定向器都没留——整理后必须做引用审计</li>
+    <li><strong>Paragon 包有"先天断链"</strong>(如 SSP_BorisSkin 从未随包发布),搬家校验时集中爆发,属正常,无视即可</li>
+  </ol>
+  <h4>解法</h4>
+  <ol>
+    <li>搬前确保 Content git 干净(安全网)</li>
+    <li>搬完:修复重定向器(找入口困难时)→ 改用"删除旧文件夹+引用检查"殊途同归</li>
+    <li>引用审计:二进制 grep 各资产的新旧路径字符串,断链的在编辑器里手动重选引用</li>
+    <li>顽固残留:关编辑器(保存选否)→ 磁盘删旧文件夹 → git 提交</li>
+  </ol>
+  <h4>教训</h4>
+  <ul>
+    <li><strong>素材库位置第一天定好,之后永不搬</strong>。其余 7 个 Paragon 包永久留根目录,External 仅 Boris 特例</li>
+    <li>目录洁癖要算成本账:一次"拖一下"的整理花掉一天,不值</li>
+    <li>修复重定向器在 5.8 中文版入口难找,备选:删除旧文件夹让编辑器自己做引用检查</li>
   </ul>
 </section>
 
