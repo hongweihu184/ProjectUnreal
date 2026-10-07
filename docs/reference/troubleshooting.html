@@ -82,6 +82,7 @@
   <a href="#p17">P17 弹簧臂相对旋转无效</a>
   <a href="#p18">P18 大规模搬素材的连环坑</a>
   <a href="#p19">P19 AI 给了不存在的节点名</a>
+  <a href="#p20">P20 蒙太奇通知显示 None</a>
 </nav>
 
 <main>
@@ -409,6 +410,25 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
     <li><strong>对 AI</strong>:给节点名/函数名之前必须核对引擎源码,"以为存在"≠"源码存在"。同类前车之鉴:P16(map_key 副本)</li>
     <li><strong>对用户</strong>:AI 给的节点名找不到时,直接质疑并要求核实源码——这比照着错答案翻菜单快得多</li>
   </ul>
+</section>
+
+<!-- ============ P20 ============ -->
+<section id="p20">
+  <h2>P20 · 蒙太奇轨道上的通知显示 "None",分不清谁是谁 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:自定义蓝图通知放上蒙太奇轨道后标签全是 "None";时间轴上右键没有"重命名"</p>
+  <h4>机制(源码已查)</h4>
+  <ul>
+    <li>轨道标签由 <code>CacheName()</code>(SAnimNotifyShared.h)动态生成:有通知对象就调它的 <code>GetNotifyName()</code>,没有才退回创建时的快照</li>
+    <li>官方 C++ 通知的默认实现返回类名(AnimNotify.cpp:58),所以官方通知天生有名字;蓝图通知默认是 None</li>
+    <li>标签有缓存——改完逻辑要<strong>重开蒙太奇标签页</strong>才刷新(本次正是如此:重写生效后,选中/重开才显示)</li>
+  </ul>
+  <h4>解法(本工程的做法)</h4>
+  <ol>
+    <li>通知蓝图里重写 <strong>Get Notify Name</strong>:<code>EventTag → Get Tag Name(BlueprintGameplayTagLibrary)→ Return Value</code>,每个实例自动显示自己的标签名</li>
+    <li>备选防弹方案:拆成多个通知类(AN_Hit / AN_ComboWindow……),类名即轨道标签</li>
+  </ol>
+  <h4>教训</h4>
+  <p>这不是外观问题——通知多了之后标签名就是可读性本身。改动后要记得"重开资产刷新缓存"这个动作。</p>
 </section>
 
 </main>
