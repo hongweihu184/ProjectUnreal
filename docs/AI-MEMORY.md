@@ -39,12 +39,20 @@
 
 ## 5. 当前进行中的事(接手点)
 
-**第 3 章已于 2026-10-07 通关**(WASD 走跑跳、Idle↔Jog、-15° 俯视相机;错题本 P15/P16/P17 出自本章)。
-下一步是**第 4 章 · 三连击与伤害**(index.html 计划表,本项目核心章):
-- 素材:`Attack_PrimaryA/B/C_Montage`(现成三段蒙太奇,直接可用);命中帧做法参考格斗模板 AM_ComboAttack + AN_AttackCombo/AN_AttackDamage(见 research/01)。
-- 任务:GA_Attack_Light(蓝图:PlayMontage + WaitGameplayEvent)→ AN 发 GameplayEvent(Event.Montage.Attack.Hit)→ SphereTrace 命中 → GE_Damage(走 Damage 元属性通道,PostGameplayEffectExecute 已就绪)→ 体力消耗 GE(Cost)→ 连击窗口(格斗模板 AN_AttackCombo 思路:窗口内再按跳下一段)。
-- 新标签预计:Ability.Attack.Light、Event.Montage.Attack.Hit、State.Attacking。
-- 参数约定:新数值都登记进 docs/reference/custom-changes.html 的参数表。
+**第 4 章进行中 — 里程碑:第一剑已挥出(2026-10-08)**。当前真实状态:
+- 激活:BP_BaseCharacter 事件图 IA_Attack → **TryActivateAbilityByClass(GA_Attack_Light_1)**(按类,用户的既有做法)。**注意:C++ 的 OnAttackInput(TryActivateAbilitiesByTag)绑定仍存在,存在双通道,连击实装前必须撤掉 C++ 那条**
+- 蒙太奇:ABP_Greystone 已加 Slot 节点(**插槽名必须 = UpperBody**,Paragon 蒙太奇不用 DefaultSlot;P22)
+- 武器判定:C++ sword_bottom 胶囊 + ANS_AttackWindow 开关 + Payload.Target 命中事件(扫掠方案已被用户否决)
+- GA 命中链:WaitGameplayEvent(Hit)→ Payload.Target → AbilityTargetDataFromActor → ApplyGameplayEffectToTarget(GE_Damage)
+- 标签:均已注册并统一(Event.Combo.WindowOpen / Event.Montage.Attack.Hit / State.Combo.Window / Ability.Attack.Light.1);GA 资产标签曾被编辑器剥离,已加回(P21)
+
+**接下来(第 4 章剩余):**
+1. 验证木桩掉血(武器胶囊 overlap → GE_Damage 是否真的扣血;若不掉血查胶囊贴合度/ANS 区间)
+2. GA_Attack_Light_2/3(复制 _1:蒙太奇 B/C + 标签 .2/.3 + Activation Required Tags = State.Combo.Window + 激活时 Cancel 上一段)
+3. 激活方式换回按标签(Ability.Attack.Light 父标签匹配三段),撤掉 C++ OnAttackInput
+4. 体力消耗验证(GE_Cost,Stamina -20/段)
+5. 木桩死亡/受击反应(可选,HitReact)
+- 详细见 docs/log/04-三连击与伤害.md 的"实际执行中的重大偏差"一节
 
 ## 6. 关键教训(血泪,别再犯)
 
