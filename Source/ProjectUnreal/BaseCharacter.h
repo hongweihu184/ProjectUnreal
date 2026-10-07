@@ -10,7 +10,7 @@ class UAbilitySystemComponent;
 class UMyAttributeSet;
 class UGameplayEffect;
 class UGameplayAbility;
-class UCapsuleComponent;
+class UPrimitiveComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -29,7 +29,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -73,28 +72,16 @@ protected:
 	void OnAttackInput();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void RegisterWeaponCollision(UPrimitiveComponent* Comp);
+
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void SetWeaponCollisionEnabled(bool bEnabled);
 
 	UFUNCTION()
 	void OnWeaponOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-	TObjectPtr<UCapsuleComponent> WeaponCollision;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	FVector WeaponCollisionCenter = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	FRotator WeaponCollisionRotation = FRotator::ZeroRotator;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float WeaponCollisionRadius = 8.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	float WeaponCollisionHalfHeight = 50.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	bool bWeaponCollision = true;
+	UPROPERTY()
+	TObjectPtr<UPrimitiveComponent> WeaponCollisionComp;
 
 	void OnJumpInput();
 
