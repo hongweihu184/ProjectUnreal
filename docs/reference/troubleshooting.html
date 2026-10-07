@@ -84,6 +84,7 @@
   <a href="#p19">P19 AI 给了不存在的节点名</a>
   <a href="#p20">P20 蒙太奇通知显示 None</a>
   <a href="#p21">P21 标签注册表事故</a>
+  <a href="#p22">P22 蒙太奇不播:插槽名不匹配</a>
 </nav>
 
 <main>
@@ -455,6 +456,24 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
     <li><strong>标签注册表改动后必须重启编辑器</strong>,且不要在资产已经引用标签的过程中改注册表</li>
     <li>"已移除的无效标签"弹窗不是提示,是<strong>资产正在被删减</strong>——看到它先别点确定,截图存档</li>
     <li>标签相关的静默失败,第一件事永远是查注册表与资产引用的一致性</li>
+  </ul>
+</section>
+
+<!-- ============ P22 ============ -->
+<section id="p22">
+  <h2>P22 · 技能激活成功但蒙太奇不播放 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:GA 激活正常(Print 有字、体力被扣),角色动画纹丝不动,日志零报错</p>
+  <h4>原因(两层)</h4>
+  <ol>
+    <li>蒙太奇必须通过动画图表里的 <strong>Slot(插槽)</strong>节点输出,状态机直连输出姿势则蒙太奇无处显示</li>
+    <li>插槽名必须<strong>与蒙太奇的插槽名一致</strong>:Paragon 蒙太奇用的是 <code>UpperBody</code>(上半身插槽),不是默认的 DefaultSlot。二进制可查:蒙太奇 uasset 里搜 <code>UpperBody</code> 字符串</li>
+  </ol>
+  <h4>解法</h4>
+  <p>ABP 动画图表:状态机 → <strong>Slot 节点(插槽名改为 UpperBody)</strong> → 输出姿势。平时透传状态机,蒙太奇播放时切换。</p>
+  <h4>教训</h4>
+  <ul>
+    <li>蒙太奇不播排查三问:ABP 有 Slot 节点吗?Slot 名和蒙太奇插槽一致吗?蒙太奇引用有效吗?</li>
+    <li>第三方素材包的蒙太奇插槽名不是 DefaultSlot,接入前先查二进制或打开蒙太奇看轨道名</li>
   </ul>
 </section>
 
