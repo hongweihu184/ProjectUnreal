@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameplayTag 存档 · 标签注册总表 · 魂类 ARPG Demo</title>
+<style>
+  :root{
+    --bg:#14161a; --bg2:#1c1f26; --bg3:#242833; --fg:#d8dce4; --dim:#8a91a0;
+    --accent:#c8a15a; --accent2:#7aa2f7; --ok:#6fbf73; --warn:#e0a050; --bad:#e06060;
+    --border:#2e3340;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--fg); font:15px/1.8 "Microsoft YaHei","PingFang SC",sans-serif;
+       display:flex; min-height:100vh;}
+  nav{width:250px; flex:0 0 250px; background:var(--bg2); border-right:1px solid var(--border);
+      position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 14px;}
+  nav h1{font-size:16px; color:var(--accent); margin-bottom:4px;}
+  nav .sub{font-size:12px; color:var(--dim); margin-bottom:16px;}
+  nav a{display:block; color:var(--fg); text-decoration:none; font-size:13.5px;
+        padding:5px 10px; border-radius:6px; border-left:2px solid transparent;}
+  nav a:hover{background:var(--bg3);}
+  nav .grp{font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin:14px 0 4px 10px;}
+  main{flex:1; max-width:920px; padding:40px 48px 120px;}
+  section{margin-bottom:40px;}
+  h2{font-size:24px; color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:16px;}
+  p{margin:8px 0;}
+  ul,ol{margin:8px 0 8px 24px;}
+  li{margin:3px 0;}
+  code{background:var(--bg3); padding:1px 6px; border-radius:4px; font-family:Consolas,monospace; font-size:13px; color:#e8c07d;}
+  pre{background:#101216; border:1px solid var(--border); border-radius:8px; padding:14px 16px;
+      overflow-x:auto; margin:10px 0; font-family:Consolas,monospace; font-size:13px; line-height:1.6; color:#c9d1e0;}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+  th{background:var(--bg3); color:var(--accent); text-align:left;}
+  th,td{border:1px solid var(--border); padding:7px 12px; vertical-align:top;}
+  tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .note{border-left:3px solid var(--accent2); background:var(--bg2); padding:10px 16px; margin:12px 0; border-radius:0 8px 8px 0;}
+  .warn{border-left:3px solid var(--warn);}
+  a{color:var(--accent2);}
+  .meta{color:var(--dim); font-size:12.5px;}
+  @media (max-width:900px){ nav{display:none;} main{padding:24px;} }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <h1>GameplayTag 存档</h1>
+  <div class="sub">标签注册总表<br>唯一真源:Config/DefaultGameplayTags.ini<br>本表是它的"人读版"</div>
+  <a href="../index.html">← 返回主文档</a>
+  <div class="grp">三棵树</div>
+  <a href="#ability">Ability(技能)</a>
+  <a href="#state">State(状态)</a>
+  <a href="#event">Event(事件)</a>
+  <div class="grp">管理</div>
+  <a href="#rules">标签使用规则</a>
+  <a href="#history">新增历史</a>
+</nav>
+
+<main>
+
+<section>
+  <h2>使用说明</h2>
+  <p>本表是 <code>Config/DefaultGameplayTags.ini</code> 的人读版存档。<strong>ini 是唯一真源</strong>——两者不一致时以 ini 为准并修正本表。每新增标签:先写 ini → 重启编辑器 → 再在本表登记一行。</p>
+  <div class="note warn"><strong>血泪规矩(错题本 P21)</strong>:ini 改动后必须重启编辑器;不要在资产已引用标签的过程中改注册表——编辑器会把"无效标签"直接从资产上剥离。</div>
+</section>
+
+<!-- ==================== Ability ==================== -->
+<section id="ability">
+  <h2>Ability · 技能树</h2>
+  <p class="meta">语义:"这是什么技能"。贴在 GA 的资产标签上;输入端用父标签匹配(HasAll 含父级匹配,源码已验证)。</p>
+  <table>
+    <tr><th>标签</th><th>含义</th><th>用在哪</th><th>新增</th></tr>
+    <tr><td><code>Ability</code></td><td>根节点</td><td>—</td><td>第 2 章</td></tr>
+    <tr><td><code>Ability.Attack.Light</code></td><td>轻攻击(三连击)总标签</td><td>输入激活匹配(C++ OnAttackInput / BP TryActivate)</td><td>第 4 章</td></tr>
+    <tr><td><code>Ability.Attack.Light.1</code></td><td>三连击·第一段</td><td>GA_Attack_Light_1 的资产标签</td><td>第 4 章</td></tr>
+    <tr><td><code>Ability.Attack.Light.2/3</code></td><td>三连击·第二/三段(待注册)</td><td>GA_2/3 的资产标签</td><td>第 4 章</td></tr>
+  </table>
+</section>
+
+<!-- ==================== State ==================== -->
+<section id="state">
+  <h2>State · 状态树</h2>
+  <p class="meta">语义:"角色此刻处于什么状态"。由 GE 授予/过期移除;其他系统只读查询,永不直接改写。</p>
+  <table>
+    <tr><th>标签</th><th>含义</th><th>授予者 → 读取者</th><th>新增</th></tr>
+    <tr><td><code>State</code></td><td>根节点</td><td>—</td><td>第 2 章</td></tr>
+    <tr><td><code>State.Attacking</code></td><td>攻击中</td><td>GA 激活已拥有标签 → UI/AI/其他技能查询</td><td>第 4 章</td></tr>
+    <tr><td><code>State.Combo.Window</code></td><td>连击窗口开放中</td><td>GE_ComboWindow(0.5s)→ GA_2/3 的激活门槛</td><td>第 4 章</td></tr>
+    <tr><td><code>State.MoveLocked</code></td><td>移动锁定</td><td>GE_MoveLock(ANS_MoveLock 区间触发)→ C++ 移动/跳跃通用闸门</td><td>第 4 章</td></tr>
+    <tr><td><code>State.Invulnerable</code></td><td>无敌帧(待注册)</td><td>翻滚 GE → 伤害管线查询免伤</td><td>第 5 章</td></tr>
+    <tr><td><code>State.Dead</code></td><td>死亡(待注册)</td><td>伤害结算血空时 → 死亡动画/UI</td><td>第 5 章</td></tr>
+  </table>
+</section>
+
+<!-- ==================== Event ==================== -->
+<section id="event">
+  <h2>Event · 事件树</h2>
+  <p class="meta">语义:"某事刚刚发生"(瞬间信号)。发送方不认接收方,接收方不认发送方,双方只认标签。</p>
+  <table>
+    <tr><th>标签</th><th>含义</th><th>谁发 → 谁收</th><th>新增</th></tr>
+    <tr><td><code>Event</code></td><td>根节点</td><td>—</td><td>第 2 章</td></tr>
+    <tr><td><code>Event.Montage.Attack.Hit</code></td><td>攻击命中</td><td>武器胶囊 overlap(Payload 带目标)→ GA 命中链</td><td>第 4 章</td></tr>
+    <tr><td><code>Event.Combo.WindowOpen</code></td><td>连击窗口开启</td><td>蒙太奇单帧通知(AN_SendGameplayEvent)→ GA 打 GE_ComboWindow</td><td>第 4 章</td></tr>
+  </table>
+</section>
+
+<!-- ==================== 规则 ==================== -->
+<section id="rules">
+  <h2>标签使用规则(本项目约定)</h2>
+  <ol>
+    <li><strong>命名</strong>:<code>树.系统.事件名</code>(如 Event.Combo.WindowOpen)。不许无前缀裸标签( Combo.WindowOpen 事故,已清理)</li>
+    <li><strong>三棵树各管各的</strong>:Ability=技能身份,State=持续状态(可查询),Event=瞬间信号(一次性)。不要把持续状态塞进 Event,反之亦然</li>
+    <li><strong>注册流程</strong>:改 ini → 重启编辑器 → 本表登记。永不跳过重启</li>
+    <li><strong>父子匹配</strong>:查询父标签能命中所有子标签(Ability.Attack.Light 匹配 .1/.2/.3)——连击选段靠这个</li>
+    <li>废弃标签:先从所有资产移除引用 → 再从 ini 删除 → 重启。顺序不可颠倒(P21)</li>
+  </ol>
+</section>
+
+<!-- ==================== 历史 ==================== -->
+<section id="history">
+  <h2>新增历史</h2>
+  <table>
+    <tr><th>日期</th><th>标签</th><th>章节</th></tr>
+    <tr><td>2026-10-07</td><td>Ability / State / Event 三根</td><td>第 2 章</td></tr>
+    <tr><td>2026-10-07</td><td>Ability.Attack.Light / State.Attacking / Event.Montage.Attack.Hit / State.Combo.Window / Event.Combo.WindowOpen</td><td>第 4 章</td></tr>
+    <tr><td>2026-10-08</td><td>Ability.Attack.Light.1(编辑器内建,已收录)/ State.MoveLocked</td><td>第 4 章</td></tr>
+  </table>
+</section>
+
+</main>
+</body>
+</html>
