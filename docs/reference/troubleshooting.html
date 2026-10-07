@@ -83,6 +83,7 @@
   <a href="#p18">P18 大规模搬素材的连环坑</a>
   <a href="#p19">P19 AI 给了不存在的节点名</a>
   <a href="#p20">P20 蒙太奇通知显示 None</a>
+  <a href="#p21">P21 标签注册表事故</a>
 </nav>
 
 <main>
@@ -429,6 +430,32 @@ git config --global https.proxy http://127.0.0.1:7897</pre>
   </ol>
   <h4>教训</h4>
   <p>这不是外观问题——通知多了之后标签名就是可读性本身。改动后要记得"重开资产刷新缓存"这个动作。</p>
+</section>
+
+<!-- ============ P21 ============ -->
+<section id="p21">
+  <h2>P21 · 标签注册表连环事故:GA 技能标签被剥离,技能静默失效 <span class="fix">已解决</span></h2>
+  <p class="sym">症状:按攻击键毫无反应(动画都不播);编辑器弹"已移除的无效标签:Ability.Attack.Light.1";资产日志一堆 "Invalid GameplayTag" 警告</p>
+  <h4>因果链(本工程 2026-10-08 实录)</h4>
+  <ol>
+    <li>标签注册表(DefaultGameplayTags.ini)在编辑器会话存活期间被多次修改(AI 清理重复行 + 用户编辑器内新建标签)</li>
+    <li><strong>GameplayTagsManager 只在启动时读 ini</strong>,运行中的会话不重载——会话内的标签表和磁盘不一致</li>
+    <li>编辑器打开/保存资产时,发现引用的标签"无效",<strong>直接把标签从资产上剥离</strong>(弹窗提示,点了确定就没了)</li>
+    <li>GA 的 AbilityTags 被剥空 → TryActivateAbilitiesByTag 匹配不到技能 → 静默失败,动画都不播</li>
+  </ol>
+  <h4>解法</h4>
+  <ol>
+    <li>确保 ini 正确后<strong>完全重启编辑器</strong></li>
+    <li>项目设置 → Gameplay 标签管理器里确认三棵树(Ability/State/Event)都在</li>
+    <li>把被剥掉的标签加回资产(GA 的资产标签等),保存</li>
+    <li>二进制审计确认(grep 资产里的标签字符串)</li>
+  </ol>
+  <h4>教训</h4>
+  <ul>
+    <li><strong>标签注册表改动后必须重启编辑器</strong>,且不要在资产已经引用标签的过程中改注册表</li>
+    <li>"已移除的无效标签"弹窗不是提示,是<strong>资产正在被删减</strong>——看到它先别点确定,截图存档</li>
+    <li>标签相关的静默失败,第一件事永远是查注册表与资产引用的一致性</li>
+  </ul>
 </section>
 
 </main>
